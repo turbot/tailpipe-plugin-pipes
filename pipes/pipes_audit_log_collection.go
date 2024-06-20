@@ -1,19 +1,13 @@
-package collection
+package pipes
 
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"os"
-	"sync"
 	"time"
 
 	"github.com/rs/xid"
-	pipes "github.com/turbot/pipes-sdk-go"
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
-	sdkconfig "github.com/turbot/tailpipe-plugin-sdk/config"
-	"github.com/turbot/tailpipe-plugin-sdk/source"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 type PipesAuditLogCollectionConfig struct {
@@ -22,66 +16,9 @@ type PipesAuditLogCollectionConfig struct {
 
 type PipesAuditLogCollection struct {
 	Config PipesAuditLogCollectionConfig
-
-	ctx context.Context
-
-	// observers is a list of observers that will be notified of events.
-	observers      []collection.CollectionObserver
-	observersMutex sync.RWMutex
 }
 
-func (c *PipesAuditLogCollection) Identifier() string {
-	return "pipes_audit_log"
-}
-
-func (c *PipesAuditLogCollection) Init(ctx context.Context) error {
-	c.ctx = ctx
-	return nil
-}
-
-func (c *PipesAuditLogCollection) Context() context.Context {
-	return c.ctx
-}
-
-func (c *PipesAuditLogCollection) AddObserver(observer collection.CollectionObserver) {
-	c.observersMutex.Lock()
-	defer c.observersMutex.Unlock()
-	c.observers = append(c.observers, observer)
-}
-
-func (c *PipesAuditLogCollection) RemoveObserver(observer collection.CollectionObserver) {
-	c.observersMutex.Lock()
-	defer c.observersMutex.Unlock()
-	for i, o := range c.observers {
-		if o == observer {
-			c.observers = append(c.observers[:i], c.observers[i+1:]...)
-			break
-		}
-	}
-}
-
-func (c *PipesAuditLogCollection) LoadConfig(configRaw []byte) error {
-	if err := sdkconfig.Load(configRaw, &c.Config); err != nil {
-		return err
-	}
-	if c.Config.Token == "" {
-		c.Config.Token = os.Getenv("PIPES_TOKEN")
-	}
-	return nil
-}
-
-func (c *PipesAuditLogCollection) ValidateConfig() error {
-	if c.Config.Token == "" {
-		return errors.New("token is required")
-	}
-	return nil
-}
-
-func (c *PipesAuditLogCollection) Schema() collection.Row {
-	return &PipesAuditLogRow{}
-}
-
-func (c *PipesAuditLogCollection) ExtractArtifactRows(ctx context.Context, a *source.Artifact) error {
+func (c *PipesAuditLogCollection) Collect(ctx context.Context, onRow func(row any)) error {
 
 	// Create a default configuration
 	configuration := pipes.NewConfiguration()
@@ -125,7 +62,7 @@ func (c *PipesAuditLogCollection) ExtractArtifactRows(ctx context.Context, a *so
 
 			for _, item := range *response.Items {
 
-				record := PipesAuditLogRow{}
+				record := &PipesAuditLogRow{}
 
 				// Record standardization
 				record.TpID = xid.New().String()
@@ -174,13 +111,7 @@ func (c *PipesAuditLogCollection) ExtractArtifactRows(ctx context.Context, a *so
 				record.TargetId = item.TargetId
 				record.TenantId = item.TenantId
 
-				//fmt.Println("Record: ", record)
-
-				for _, o := range c.observers {
-					o.NotifyRow(a, &record)
-				}
-
-				//fmt.Printf("Wrote: %s\n", item.Id)
+				onRow(record)
 			}
 		}
 

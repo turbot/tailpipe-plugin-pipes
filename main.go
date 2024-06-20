@@ -1,5 +1,14 @@
 package main
 
-import "github.com/turbot/tailpipe-plugin-pipes/plugin"
+import (
+	"context"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes"
+	"github.com/turbot/tailpipe-plugin-sdk/plugin"
+)
 
-var Plugin plugin.PipesPlugin
+func main() {
+	plugin.Serve(&plugin.ServeOpts{
+		// TODO should we pass func, not object? For dynamic plugins? Will we have those?
+		Plugin: pipes.NewPlugin(context.Background()),
+	})
+}
