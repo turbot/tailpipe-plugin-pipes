@@ -2,6 +2,7 @@ package pipes
 
 import (
 	"context"
+	"github.com/turbot/tailpipe-plugin-pipes/collection"
 	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"os"
@@ -23,19 +24,23 @@ func (t *Plugin) Collect(req *proto.CollectRequest) error {
 }
 
 func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) {
-	collection := &PipesAuditLogCollection{
-		Config: PipesAuditLogCollectionConfig{
+	// todo config parsing, identify collection type etc.
+
+	var col plugin.Collection
+
+	// todo tactical - create collection
+	col = collection.NewAuditLog(
+		collection.AuditLogConfig{
 			Token: os.Getenv("PIPES_TOKEN"),
 		},
-	}
-	onRow := func(row any) {
-		t.OnRow(row, req)
-	}
+		t,
+	)
 
+	// signal we have started
 	t.OnStarted(req)
 
-	err := collection.Collect(ctx, onRow)
+	err := col.Collect(ctx, req)
 
+	// signal we have completed
 	t.OnComplete(req, err)
-
 }
