@@ -2,7 +2,9 @@ package pipes
 
 import (
 	"context"
-	"github.com/turbot/tailpipe-plugin-pipes/collection"
+
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
 	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"os"
@@ -26,20 +28,20 @@ func (t *Plugin) Collect(req *proto.CollectRequest) error {
 func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) {
 	// todo config parsing, identify collection type etc.
 
-	var col plugin.Collection
-
 	// TODO parse config and use to build collection
 	//  tactical - create collection
-	config := collection.AuditLogConfig{Token: os.Getenv("PIPES_TOKEN")}
+	config := pipes_collection.AuditLogConfig{Token: os.Getenv("PIPES_TOKEN")}
 	// TODO source
-	var source plugin.Source = nil
+	var source = pipes_source.NewAuditLogAPISource(config)
+	var col = pipes_collection.NewAuditLog(config, source)
 
-	col = collection.NewAuditLog(config, source, t)
-
+	// add ourselves as an observer
 	col.AddObserver(t)
+
 	// signal we have started
 	t.OnStarted(req)
 
+	// tell the collection to start collecting - this is a blocking call
 	err := col.Collect(ctx, req)
 
 	// signal we have completed
