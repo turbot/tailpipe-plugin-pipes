@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	pipes2 "github.com/turbot/tailpipe-plugin-pipes/pipes"
+	pipes2 "github.com/turbot/tailpipe-plugin-pipes/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"time"
 

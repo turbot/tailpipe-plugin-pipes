@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	pipes2 "github.com/turbot/tailpipe-plugin-pipes/pipes"
+	helpers "github.com/turbot/tailpipe-plugin-pipes/helpers"
+	"github.com/turbot/tailpipe-plugin-sdk/collection"
+	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"time"
 
@@ -17,11 +19,12 @@ type AuditLogConfig struct {
 }
 
 type AuditLog struct {
+	collection.Base
 	Config AuditLogConfig
 	source plugin.Source
 	pub    plugin.RowPublisher
 }
-// ctor
+
 func NewAuditLog(config AuditLogConfig, source plugin.Source, pub plugin.RowPublisher) *AuditLog {
 	return &AuditLog{
 		Config: config,
@@ -30,9 +33,7 @@ func NewAuditLog(config AuditLogConfig, source plugin.Source, pub plugin.RowPubl
 	}
 }
 
-
-func (c *AuditLog) Collect(ctx context.Context, req proto.) error {
-
+func (c *AuditLog) Collect(ctx context.Context, req *proto.CollectRequest) error {
 
 	// Create a default configuration
 	configuration := pipes.NewConfiguration()
@@ -55,16 +56,16 @@ func (c *AuditLog) Collect(ctx context.Context, req proto.) error {
 	conn = conn + ":" + orgHandle
 
 	for {
-		req := client.Orgs.ListAuditLogs(ctx, orgHandle)
+		listReq := client.Orgs.ListAuditLogs(ctx, orgHandle)
 		if nextToken != "" {
-			req = req.NextToken(nextToken)
+			listReq = listReq.NextToken(nextToken)
 		}
 
 		fmt.Println("Request with NextToken: ", nextToken)
 
-		req = req.Limit(100)
+		listReq = listReq.Limit(100)
 
-		response, _, err := req.Execute()
+		response, _, err := listReq.Execute()
 		if err != nil {
 			// Do something with the error
 			panic(err)
@@ -75,7 +76,7 @@ func (c *AuditLog) Collect(ctx context.Context, req proto.) error {
 			fmt.Printf("Response item count: %d\n", len(*response.Items))
 
 			for _, item := range *response.Items {
-
+				c.OnRow(item, conn, req)
 			}
 		}
 
@@ -95,22 +96,20 @@ func (c *AuditLog) Collect(ctx context.Context, req proto.) error {
 
 // OnRow implements plugin.RowEnricher
 // it is called by a Source in order to enrich a raw row and publish it
-func (c *AuditLog) OnRow(row any, connection string) error {
+func (c *AuditLog) OnRow(row any, connection string, req *proto.CollectRequest) error {
 
-		auditRecord, ok := row.(pipes.AuditRecord)
-		if !ok {
-			return fmt.Errorf("invalid row type")
-		}
-
-		enrichedRow, err := c.enrichRow(auditRecord, connection)
-		if err != nil {
-			return err
-		}
-
-		// publish this enriched row
-		c.pub.OnRow(enrichedRow)
-
+	auditRecord, ok := row.(pipes.AuditRecord)
+	if !ok {
+		return fmt.Errorf("invalid row type")
 	}
+
+	enrichedRow, err := c.enrichRow(auditRecord, connection)
+	if err != nil {
+		return err
+	}
+
+	// publish this enriched row
+	return c.pub.OnRow(enrichedRow, req)
 }
 
 func (c *AuditLog) enrichRow(item pipes.AuditRecord, conn string) (*PipesAuditLogRow, error) {
@@ -123,8 +122,8 @@ func (c *AuditLog) enrichRow(item pipes.AuditRecord, conn string) (*PipesAuditLo
 	if err != nil {
 		return nil, err
 	}
-	record.TpTimestamp = pipes2.UnixMillis(tpTimestamp.UnixNano() / int64(time.Millisecond))
-	record.TpIngestTimestamp = pipes2.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
+	record.TpTimestamp = helpers.UnixMillis(tpTimestamp.UnixNano() / int64(time.Millisecond))
+	record.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
 	if record.ActorIp != "" {
 		record.TpSourceIP = &item.ActorIp
 		record.TpIps = append(record.TpIps, item.ActorIp)
@@ -153,7 +152,7 @@ func (c *AuditLog) enrichRow(item pipes.AuditRecord, conn string) (*PipesAuditLo
 	if err != nil {
 		panic(err)
 	}
-	js := pipes2.JSONString(s)
+	js := helpers.JSONString(s)
 	record.Data = &js
 	record.Id = item.Id
 	record.IdentityHandle = item.IdentityHandle
@@ -169,16 +168,16 @@ func (c *AuditLog) enrichRow(item pipes.AuditRecord, conn string) (*PipesAuditLo
 type PipesAuditLogRow struct {
 
 	// Metadata
-	TpID              string            `json:"tp_id" parquet:"name=tp_id, type=BYTE_ARRAY, convertedtype=UTF8"`
-	TpSourceType      string            `json:"tp_source_type" parquet:"name=tp_source_type, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
-	TpSourceName      *string           `json:"tp_source_name" parquet:"name=tp_source_name, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
-	TpSourceLocation  *string           `json:"tp_source_location" parquet:"name=tp_source_location, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
-	TpIngestTimestamp pipes2.UnixMillis `json:"tp_ingest_timestamp" parquet:"name=tp_ingest_timestamp, type=INT64, convertedtype=TIMESTAMP_MILLIS"`
+	TpID              string             `json:"tp_id" parquet:"name=tp_id, type=BYTE_ARRAY, convertedtype=UTF8"`
+	TpSourceType      string             `json:"tp_source_type" parquet:"name=tp_source_type, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	TpSourceName      *string            `json:"tp_source_name" parquet:"name=tp_source_name, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	TpSourceLocation  *string            `json:"tp_source_location" parquet:"name=tp_source_location, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	TpIngestTimestamp helpers.UnixMillis `json:"tp_ingest_timestamp" parquet:"name=tp_ingest_timestamp, type=INT64, convertedtype=TIMESTAMP_MILLIS"`
 
 	// Standardized
-	TpTimestamp     pipes2.UnixMillis `json:"tp_timestamp" parquet:"name=tp_timestamp, type=INT64, convertedtype=TIMESTAMP_MILLIS"`
-	TpSourceIP      *string           `json:"tp_source_ip" parquet:"name=tp_source_ip, type=BYTE_ARRAY, convertedtype=UTF8"`
-	TpDestinationIP *string           `json:"tp_destination_ip" parquet:"name=tp_destination_ip, type=BYTE_ARRAY, convertedtype=UTF8"`
+	TpTimestamp     helpers.UnixMillis `json:"tp_timestamp" parquet:"name=tp_timestamp, type=INT64, convertedtype=TIMESTAMP_MILLIS"`
+	TpSourceIP      *string            `json:"tp_source_ip" parquet:"name=tp_source_ip, type=BYTE_ARRAY, convertedtype=UTF8"`
+	TpDestinationIP *string            `json:"tp_destination_ip" parquet:"name=tp_destination_ip, type=BYTE_ARRAY, convertedtype=UTF8"`
 
 	// Hive fields
 	TpCollection string `json:"tp_collection" parquet:"name=tp_collection, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
@@ -206,8 +205,8 @@ type PipesAuditLogRow struct {
 	ActorId string `json:"actor_id" parquet:"name=actor_id, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
 	ActorIp string `json:"actor_ip" parquet:"name=actor_ip, type=BYTE_ARRAY, convertedtype=UTF8"`
 	// The time when the audit log was recorded.
-	CreatedAt pipes2.UnixMillis  `json:"created_at" parquet:"name=created_at, type=INT64, convertedtype=TIMESTAMP_MILLIS"`
-	Data      *pipes2.JSONString `json:"data" parquet:"name=data, type=BYTE_ARRAY, convertedtype=UTF8"`
+	CreatedAt helpers.UnixMillis  `json:"created_at" parquet:"name=created_at, type=INT64, convertedtype=TIMESTAMP_MILLIS"`
+	Data      *helpers.JSONString `json:"data" parquet:"name=data, type=BYTE_ARRAY, convertedtype=UTF8"`
 	// The unique identifier for an audit log.
 	Id string `json:"id" parquet:"name=id, type=BYTE_ARRAY, convertedtype=UTF8"`
 	// The handle name for an identity where the action has been performed.

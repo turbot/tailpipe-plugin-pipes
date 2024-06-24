@@ -28,14 +28,15 @@ func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) {
 
 	var col plugin.Collection
 
-	// todo tactical - create collection
-	col = collection.NewAuditLog(
-		collection.AuditLogConfig{
-			Token: os.Getenv("PIPES_TOKEN"),
-		},
-		t,
-	)
+	// TODO parse config and use to build collection
+	//  tactical - create collection
+	config := collection.AuditLogConfig{Token: os.Getenv("PIPES_TOKEN")}
+	// TODO source
+	var source plugin.Source = nil
 
+	col = collection.NewAuditLog(config, source, t)
+
+	col.AddObserver(t)
 	// signal we have started
 	t.OnStarted(req)
 
