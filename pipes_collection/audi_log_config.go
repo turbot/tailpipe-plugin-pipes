@@ -1,5 +1,6 @@
 package pipes_collection
 
-type AuditLogConfig struct {
+// TODO do we need separate Collection and Source config?
+type AuditLogCollectionConfig struct {
 	Token string `json:"token"`
 }

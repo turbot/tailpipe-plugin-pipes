@@ -1,50 +1,56 @@
 package pipes_collection
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	helpers "github.com/turbot/tailpipe-plugin-pipes/helpers"
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
-	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/tailpipe-plugin-sdk/plugin"
+	"github.com/turbot/tailpipe-plugin-sdk/constants"
 	"time"
 
 	"github.com/rs/xid"
 	"github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/tailpipe-plugin-sdk/collection"
+	"github.com/turbot/tailpipe-plugin-sdk/helpers"
+	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 )
 
-type AuditLog struct {
+type AuditLogCollection struct {
+	// all collections must embed collection.Base
+	// this add observer and enrich functions
 	collection.Base
-	Config AuditLogConfig
-	source plugin.Source
+
+	// the collection config
+	Config AuditLogCollectionConfig
 }
 
-func NewAuditLog(config AuditLogConfig, source plugin.Source) *AuditLog {
-	l := &AuditLog{
+func NewAuditLogCollection(config AuditLogCollectionConfig, source plugin.Source) *AuditLogCollection {
+	l := &AuditLogCollection{
 		Config: config,
-		source: source,
 	}
-	// set the enrich func
-	l.EnrichFunc = l.enrichRow
-
-	// add ourselves as an observer to our source
-	l.source.AddObserver(l)
+	// Init sets the Source property on Base and adds us as an observer to it
+	// It also sets us as the Enricher property on Base
+	l.Base.Init(source, l)
 
 	return l
 }
 
-func (a *AuditLog) Collect(ctx context.Context, req *proto.CollectRequest) error {
-	// tell our source to collect - we will receive row
-	return a.source.Collect(ctx, req)
+func (a *AuditLogCollection) Identifier() string {
+	return "pipes_audit_log"
 }
 
-func (a *AuditLog) enrichRow(row any, conn string) (any, error) {
+func (a *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields map[string]any) (any, error) {
 	// row must be an AuditRecord
 	item, ok := row.(pipes.AuditRecord)
 	if !ok {
-
-		return nil, fmt.Errorf("invalid row type")
+		return nil, fmt.Errorf("invalid row type %T, expected AuditRecord", row)
+	}
+	// we expect sourceEnrichmentFields to be set
+	if sourceEnrichmentFields == nil {
+		return nil, fmt.Errorf("AuditLogCollection EnrichRow called with nil sourceEnrichmentFields")
+	}
+	// we expect connection to be set by the Source
+	conn, ok := sourceEnrichmentFields[constants.TpConnection].(string)
+	if !ok {
+		return nil, fmt.Errorf("Source must provide connection in sourceEnrichmentFields")
 	}
 
 	record := &AuditLogRow{}
@@ -95,5 +101,6 @@ func (a *AuditLog) enrichRow(row any, conn string) (any, error) {
 	record.TargetHandle = item.TargetHandle
 	record.TargetId = item.TargetId
 	record.TenantId = item.TenantId
+
 	return record, nil
 }

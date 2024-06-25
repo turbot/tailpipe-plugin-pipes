@@ -19,7 +19,6 @@ func (t *Plugin) Identifier() string {
 }
 
 func (t *Plugin) Collect(req *proto.CollectRequest) error {
-
 	go t.doCollect(context.Background(), req)
 
 	return nil
@@ -30,10 +29,10 @@ func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) {
 
 	// TODO parse config and use to build collection
 	//  tactical - create collection
-	config := pipes_collection.AuditLogConfig{Token: os.Getenv("PIPES_TOKEN")}
+	config := pipes_collection.AuditLogCollectionConfig{Token: os.Getenv("PIPES_TOKEN")}
 	// TODO source
 	var source = pipes_source.NewAuditLogAPISource(config)
-	var col = pipes_collection.NewAuditLog(config, source)
+	var col = pipes_collection.NewAuditLogCollection(config, source)
 
 	// add ourselves as an observer
 	col.AddObserver(t)

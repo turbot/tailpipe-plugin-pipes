@@ -5,26 +5,29 @@ import (
 	"fmt"
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
+	"github.com/turbot/tailpipe-plugin-sdk/constants"
 	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/source"
 )
 
-// AuditLogAPI source is responsible for collecting audit logs from Turbot Pipes API
-type AuditLogAPI struct {
+// AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
+type AuditLogAPISource struct {
 	source.Base
-	Config pipes_collection.AuditLogConfig
+	Config pipes_collection.AuditLogCollectionConfig
 }
 
-func NewAuditLogAPISource(config pipes_collection.AuditLogConfig) plugin.Source {
-	return &AuditLogAPI{
+func NewAuditLogAPISource(config pipes_collection.AuditLogCollectionConfig) plugin.Source {
+	return &AuditLogAPISource{
 		Config: config,
 	}
-
 }
 
-func (s *AuditLogAPI) Collect(ctx context.Context, req *proto.CollectRequest) error {
+func (s *AuditLogAPISource) Identifier() string {
+	return "pipes_audit_log_api_source"
+}
 
+func (s *AuditLogAPISource) Collect(ctx context.Context, req *proto.CollectRequest) error {
 	// Create a default configuration
 	configuration := pipes.NewConfiguration()
 
@@ -44,6 +47,12 @@ func (s *AuditLogAPI) Collect(ctx context.Context, req *proto.CollectRequest) er
 		conn = "pipes.turbot.com"
 	}
 	conn = conn + ":" + orgHandle
+
+	// populate enrichment fields the the source is aware of
+	// - in this case the connection
+	sourceEnrichmentFields := map[string]interface{}{
+		constants.TpConnection: conn,
+	}
 
 	for {
 		listReq := client.Orgs.ListAuditLogs(ctx, orgHandle)
@@ -66,7 +75,7 @@ func (s *AuditLogAPI) Collect(ctx context.Context, req *proto.CollectRequest) er
 			fmt.Printf("Response item count: %d\n", len(*response.Items))
 
 			for _, item := range *response.Items {
-				s.OnRow(req, conn, item)
+				s.OnRow(req, item, sourceEnrichmentFields)
 			}
 		}
 
