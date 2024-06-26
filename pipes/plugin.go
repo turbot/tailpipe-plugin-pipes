@@ -2,7 +2,6 @@ package pipes
 
 import (
 	"context"
-
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
 	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
@@ -14,9 +13,26 @@ type Plugin struct {
 	plugin.Base
 }
 
+// ctor
+//
+//	func NewPlugin(_ context.Context) *Plugin {
+//		return &Plugin{}
+//	}
 func (t *Plugin) Identifier() string {
 	return "aws"
 }
+
+//// GetSchema returns the schema (i.e. an instance of the row struct) for all collections
+//// it is used primarily to validate the row structs provide the required fields
+//func (t *Plugin) GetSchema(collection string) map[string]any {
+//	collections := []plugin.Collection{
+//		&pipes_collection.AuditLogCollection{},
+//	}
+//
+//	return map[string]any{
+//		pipes_collection.AuditLogCollection{}.Identifier(): pipes_collection.AuditLogRow{},
+//	}
+//}
 
 func (t *Plugin) Collect(req *proto.CollectRequest) error {
 	go t.doCollect(context.Background(), req)
