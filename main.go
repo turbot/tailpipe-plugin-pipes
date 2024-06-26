@@ -1,5 +1,12 @@
 package main
 
-import "github.com/turbot/tailpipe-plugin-pipes/plugin"
+import (
+	"github.com/turbot/tailpipe-plugin-pipes/pipes"
+	"github.com/turbot/tailpipe-plugin-sdk/plugin"
+)
 
-var Plugin plugin.PipesPlugin
+func main() {
+	plugin.Serve(&plugin.ServeOpts{
+		Plugin: &pipes.Plugin{},
+	})
+}
