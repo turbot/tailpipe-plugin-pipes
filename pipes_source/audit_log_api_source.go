@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/turbot/pipes-sdk-go"
-	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
-	"github.com/turbot/tailpipe-plugin-sdk/constants"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
+	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/source"
@@ -50,9 +50,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context, req *proto.CollectReque
 
 	// populate enrichment fields the the source is aware of
 	// - in this case the connection
-	sourceEnrichmentFields := map[string]interface{}{
-		constants.TpConnection: conn,
-	}
+	sourceEnrichmentFields := &enrichment.CommonFields{TpConnection: conn}
 
 	for {
 		listReq := client.Orgs.ListAuditLogs(ctx, orgHandle)

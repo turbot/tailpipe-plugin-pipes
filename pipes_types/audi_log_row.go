@@ -1,4 +1,4 @@
-package pipes_collection
+package pipes_types
 
 import (
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
@@ -8,7 +8,7 @@ import (
 // AuditLogRow is the struct containing the enriched data for an AuditRecord
 type AuditLogRow struct {
 	// embed required enrichment fields
-	enrichment.EnrichmentFields
+	enrichment.CommonFields
 
 	// Additional fields
 	ActionType       string              `json:"action_type"`

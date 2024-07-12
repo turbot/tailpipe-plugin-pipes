@@ -3,7 +3,7 @@ package pipes
 import (
 	"context"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
-	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
 	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"os"
@@ -19,7 +19,7 @@ type Plugin struct {
 //		return &Plugin{}
 //	}
 func (t *Plugin) Identifier() string {
-	return "aws"
+	return "pipes"
 }
 
 //// GetSchema returns the schema (i.e. an instance of the row struct) for all collections
@@ -45,10 +45,12 @@ func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) {
 
 	// TODO parse config and use to build collection
 	//  tactical - create collection
-	config := pipes_collection.AuditLogCollectionConfig{Token: os.Getenv("PIPES_TOKEN")}
-	// TODO source
-	var source = pipes_source.NewAuditLogAPISource(config)
-	var col = pipes_collection.NewAuditLogCollection(config, source)
+	config := &pipes_types.AuditLogCollectionConfig{Token: os.Getenv("PIPES_TOKEN")}
+
+	var col = pipes_collection.NewAuditLogCollection()
+
+	// TEMP call init
+	col.Init(config)
 
 	// add ourselves as an observer
 	col.AddObserver(t)

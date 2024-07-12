@@ -7,6 +7,6 @@ import (
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		Plugin: &pipes.Plugin{},
+		PluginFunc: pipes.NewPlugin,
 	})
 }

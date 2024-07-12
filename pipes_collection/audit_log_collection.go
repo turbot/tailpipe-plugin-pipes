@@ -19,22 +19,49 @@ type AuditLogCollection struct {
 	collection.Base
 
 	// the collection config
-	Config AuditLogCollectionConfig
+	Config *pipes_types.AuditLogCollectionConfig
 }
 
-func NewAuditLogCollection(config AuditLogCollectionConfig, source plugin.Source) *AuditLogCollection {
-	l := &AuditLogCollection{
-		Config: config,
-	}
-	// Init sets the Source property on Base and adds us as an observer to it
-	// It also sets us as the Enricher property on Base
-	l.Base.Init(source, l)
+func NewAuditLogCollection() plugin.Collection {
+	l := &AuditLogCollection{}
+	// TODO avoid need for plugin implementation to do this
+	// Init sets us as the Enricher property on Base
+
+	l.Base.Init(l)
 
 	return l
 }
 
 func (a *AuditLogCollection) Identifier() string {
 	return "pipes_audit_log"
+}
+
+// GetRowStruct implements Collection
+// return an instance of the row struct
+func (c *AuditLogCollection) GetRowStruct() any {
+	return pipes_types.AuditLogRow{}
+}
+
+// Init implements Collection
+func (c *AuditLogCollection) Init(config any) error {
+	// TEMP - this will actually parse (or the base will)
+
+	// todo - parse config
+	c.Config = config.(*pipes_types.AuditLogCollectionConfig)
+	// todo validate config
+
+	// todo create source from config
+	source, err := c.getSource(c.Config)
+	if err != nil {
+		return err
+	}
+	c.AddSource(source)
+
+	return nil
+}
+
+func (c *AuditLogCollection) getSource(config *pipes_types.AuditLogCollectionConfig) (plugin.RowSource, error) {
+	return pipes_source.NewAuditLogAPISource(config), nil
 }
 
 func (a *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields map[string]any) (any, error) {
@@ -48,12 +75,13 @@ func (a *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields map[strin
 		return nil, fmt.Errorf("AuditLogCollection EnrichRow called with nil sourceEnrichmentFields")
 	}
 	// we expect connection to be set by the Source
-	conn, ok := sourceEnrichmentFields[constants.TpConnection].(string)
-	if !ok {
+	if sourceEnrichmentFields == nil || sourceEnrichmentFields.TpConnection == "" {
 		return nil, fmt.Errorf("Source must provide connection in sourceEnrichmentFields")
 	}
 
-	record := &AuditLogRow{}
+	record := &pipes_types.AuditLogRow{
+		CommonFields: *sourceEnrichmentFields,
+	}
 
 	// Record standardization
 	record.TpID = xid.New().String()
@@ -75,7 +103,6 @@ func (a *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields map[strin
 
 	// Set hive fields
 	record.TpCollection = "pipes_audit_log"
-	record.TpConnection = conn
 	record.TpYear = int32(tpTimestamp.Year())
 	record.TpMonth = int32(tpTimestamp.Month())
 	record.TpDay = int32(tpTimestamp.Day())
