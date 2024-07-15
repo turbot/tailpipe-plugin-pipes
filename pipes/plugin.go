@@ -15,26 +15,22 @@ type Plugin struct {
 	plugin.Base
 }
 
-// ctor
-//
-//	func NewPlugin(_ context.Context) *Plugin {
-//		return &Plugin{}
-//	}
+func NewPlugin() (plugin.TailpipePlugin, error) {
+	p := &Plugin{}
+
+	//time.Sleep(10 * time.Second)
+	// register collections which we support
+	err := p.RegisterCollections(pipes_collection.NewAuditLogCollection)
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+
 func (t *Plugin) Identifier() string {
 	return "pipes"
 }
-
-//// GetSchema returns the schema (i.e. an instance of the row struct) for all collections
-//// it is used primarily to validate the row structs provide the required fields
-//func (t *Plugin) GetSchema(collection string) map[string]any {
-//	collections := []plugin.Collection{
-//		&pipes_collection.AuditLogCollection{},
-//	}
-//
-//	return map[string]any{
-//		pipes_collection.AuditLogCollection{}.Identifier(): pipes_collection.AuditLogRow{},
-//	}
-//}
 
 func (t *Plugin) Collect(req *proto.CollectRequest) error {
 	go func() {
