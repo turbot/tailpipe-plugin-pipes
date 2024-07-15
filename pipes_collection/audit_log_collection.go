@@ -3,7 +3,9 @@ package pipes_collection
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/turbot/tailpipe-plugin-sdk/constants"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
+	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"time"
 
 	"github.com/rs/xid"
@@ -62,7 +64,7 @@ func (c *AuditLogCollection) getSource(config *pipes_types.AuditLogCollectionCon
 	return pipes_source.NewAuditLogAPISource(config), nil
 }
 
-func (a *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields map[string]any) (any, error) {
+func (a *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
 	// row must be an AuditRecord
 	item, ok := row.(pipes.AuditRecord)
 	if !ok {

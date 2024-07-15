@@ -8,16 +8,16 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
-	"github.com/turbot/tailpipe-plugin-sdk/source"
+	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 )
 
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
-	source.Base
-	Config pipes_collection.AuditLogCollectionConfig
+	row_source.Base
+	Config *pipes_types.AuditLogCollectionConfig
 }
 
-func NewAuditLogAPISource(config pipes_collection.AuditLogCollectionConfig) plugin.Source {
+func NewAuditLogAPISource(config *pipes_types.AuditLogCollectionConfig) plugin.RowSource {
 	return &AuditLogAPISource{
 		Config: config,
 	}
