@@ -2,10 +2,12 @@ package pipes
 
 import (
 	"context"
+	"fmt"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
 	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
+	"log/slog"
 	"os"
 )
 
@@ -35,12 +37,17 @@ func (t *Plugin) Identifier() string {
 //}
 
 func (t *Plugin) Collect(req *proto.CollectRequest) error {
-	go t.doCollect(context.Background(), req)
+	go func() {
+		if err := t.doCollect(context.Background(), req); err != nil {
+			// TODO #err handle error
+			slog.Error("doCollect failed", "error", err)
+		}
+	}()
 
 	return nil
 }
 
-func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) {
+func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) error {
 	// todo config parsing, identify collection type etc.
 
 	// TODO parse config and use to build collection
@@ -50,17 +57,26 @@ func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) {
 	var col = pipes_collection.NewAuditLogCollection()
 
 	// TEMP call init
-	col.Init(config)
+	err := col.Init(config)
+	if err != nil {
+		return fmt.Errorf("error initializing collection: %w", err)
+	}
 
 	// add ourselves as an observer
-	col.AddObserver(t)
+	if err := col.AddObserver(t); err != nil {
+		return fmt.Errorf("error adding observer: %w", err)
+	}
 
 	// signal we have started
-	t.OnStarted(req)
+	if err := t.OnStarted(req); err != nil {
+		return fmt.Errorf("error signalling started: %w", err)
+	}
 
 	// tell the collection to start collecting - this is a blocking call
-	err := col.Collect(ctx, req)
+	if err := col.Collect(ctx, req); err != nil {
+		return fmt.Errorf("error collecting: %w", err)
+	}
 
 	// signal we have completed
-	t.OnComplete(req, err)
+	return t.OnCompleted(req, err)
 }

@@ -55,9 +55,7 @@ func (c *AuditLogCollection) Init(config any) error {
 	if err != nil {
 		return err
 	}
-	c.AddSource(source)
-
-	return nil
+	return c.AddSource(source)
 }
 
 func (c *AuditLogCollection) getSource(config *pipes_types.AuditLogCollectionConfig) (plugin.RowSource, error) {
