@@ -32,7 +32,7 @@ func (t *Plugin) Identifier() string {
 	return "pipes"
 }
 
-func (t *Plugin) Collect(req *proto.CollectRequest) error {
+func (t *Plugin) Collect(ctx context.Context, req *proto.CollectRequest) error {
 	go func() {
 		if err := t.doCollect(context.Background(), req); err != nil {
 			// TODO #err handle error
@@ -64,7 +64,7 @@ func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) error
 	}
 
 	// signal we have started
-	if err := t.OnStarted(req); err != nil {
+	if err := t.OnStarted(ctx, req); err != nil {
 		return fmt.Errorf("error signalling started: %w", err)
 	}
 
@@ -74,5 +74,5 @@ func (t *Plugin) doCollect(ctx context.Context, req *proto.CollectRequest) error
 	}
 
 	// signal we have completed
-	return t.OnCompleted(req, err)
+	return t.OnCompleted(ctx, req, err)
 }
