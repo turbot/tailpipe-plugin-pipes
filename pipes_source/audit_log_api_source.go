@@ -73,7 +73,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context, req *proto.CollectReque
 			fmt.Printf("Response item count: %d\n", len(*response.Items))
 
 			for _, item := range *response.Items {
-				if err := s.OnRow(ctx, req, item, sourceEnrichmentFields); err != nil {
+				if err := s.OnRow(ctx, item, sourceEnrichmentFields); err != nil {
 					return fmt.Errorf("error processing row: %w", err)
 				}
 			}
