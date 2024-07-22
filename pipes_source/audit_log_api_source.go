@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
+	"github.com/turbot/tailpipe-plugin-sdk/artifact"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 )
@@ -27,7 +27,7 @@ func (s *AuditLogAPISource) Identifier() string {
 	return "pipes_audit_log_api_source"
 }
 
-func (s *AuditLogAPISource) Collect(ctx context.Context, req *proto.CollectRequest) error {
+func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 	// Create a default configuration
 	configuration := pipes.NewConfiguration()
 
@@ -72,8 +72,11 @@ func (s *AuditLogAPISource) Collect(ctx context.Context, req *proto.CollectReque
 
 			fmt.Printf("Response item count: %d\n", len(*response.Items))
 
+			// TODO PAGING DATA
 			for _, item := range *response.Items {
-				if err := s.OnRow(ctx, item, sourceEnrichmentFields); err != nil {
+				// populate artifact data
+				row := &artifact.ArtifactData{Data: item, Metadata: sourceEnrichmentFields}
+				if err := s.OnRow(ctx, row, nil); err != nil {
 					return fmt.Errorf("error processing row: %w", err)
 				}
 			}

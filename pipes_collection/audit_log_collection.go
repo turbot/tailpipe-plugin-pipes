@@ -1,11 +1,13 @@
 package pipes_collection
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"os"
 	"time"
 
 	"github.com/rs/xid"
@@ -17,7 +19,6 @@ import (
 
 type AuditLogCollection struct {
 	// all collections must embed collection.Base
-	// this add observer and enrich functions
 	collection.Base
 
 	// the collection config
@@ -25,16 +26,10 @@ type AuditLogCollection struct {
 }
 
 func NewAuditLogCollection() plugin.Collection {
-	l := &AuditLogCollection{}
-	// TODO avoid need for plugin implementation to do this
-	// Init sets us as the Enricher property on Base
-
-	l.Base.Init(l)
-
-	return l
+	return &AuditLogCollection{}
 }
 
-func (a *AuditLogCollection) Identifier() string {
+func (c *AuditLogCollection) Identifier() string {
 	return "pipes_audit_log"
 }
 
@@ -45,11 +40,19 @@ func (c *AuditLogCollection) GetRowStruct() any {
 }
 
 // Init implements Collection
-func (c *AuditLogCollection) Init(config any) error {
+func (c *AuditLogCollection) Init(ctx context.Context, configData []byte) error {
 	// TEMP - this will actually parse (or the base will)
+	// unmarshal the config
+	config := &pipes_types.AuditLogCollectionConfig{
+		Token: os.Getenv("PIPES_TOKEN"),
+	}
+	//err := json.Unmarshal(configData, config)
+	//if err != nil {
+	//	return fmt.Errorf("error unmarshalling config: %w", err)
+	//}
 
-	// todo - parse config
-	c.Config = config.(*pipes_types.AuditLogCollectionConfig)
+	// todo - parse config as hcl
+	c.Config = config
 	// todo validate config
 
 	// todo create source from config
@@ -64,7 +67,7 @@ func (c *AuditLogCollection) getSource(config *pipes_types.AuditLogCollectionCon
 	return pipes_source.NewAuditLogAPISource(config), nil
 }
 
-func (a *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
+func (c *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
 	// row must be an AuditRecord
 	item, ok := row.(pipes.AuditRecord)
 	if !ok {
