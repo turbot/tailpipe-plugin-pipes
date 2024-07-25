@@ -19,6 +19,8 @@ func NewPlugin() (plugin.TailpipePlugin, error) {
 		return nil, err
 	}
 
+	//p.RegisterSources(pipes_source.NewAuditLogAPISource)
+
 	return p, nil
 }
 
