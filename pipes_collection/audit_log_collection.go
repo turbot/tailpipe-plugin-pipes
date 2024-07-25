@@ -35,8 +35,12 @@ func (c *AuditLogCollection) Identifier() string {
 
 // GetRowStruct implements Collection
 // return an instance of the row struct
-func (c *AuditLogCollection) GetRowStruct() any {
+func (c *AuditLogCollection) GetRowSchema() any {
 	return pipes_types.AuditLogRow{}
+}
+
+func (c *AuditLogCollection) GetConfigSchema() any {
+	return &pipes_types.AuditLogCollectionConfig{}
 }
 
 // Init implements Collection
@@ -51,7 +55,7 @@ func (c *AuditLogCollection) Init(ctx context.Context, configData []byte) error 
 	//	return fmt.Errorf("error unmarshalling config: %w", err)
 	//}
 
-	// todo - parse config as hcl
+	// todo #config- parse config as hcl
 	c.Config = config
 	// todo validate config
 
