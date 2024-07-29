@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"github.com/turbot/tailpipe-plugin-sdk/paging"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 )
@@ -15,6 +16,10 @@ import (
 type AuditLogAPISource struct {
 	row_source.Base
 	Config *pipes_types.AuditLogCollectionConfig
+}
+
+func (s *AuditLogAPISource) GetPagingData() paging.Data {
+	return nil
 }
 
 func NewAuditLogAPISource(config *pipes_types.AuditLogCollectionConfig) plugin.RowSource {

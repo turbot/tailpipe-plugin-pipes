@@ -3,6 +3,7 @@ package pipes
 import (
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
+	"time"
 )
 
 type Plugin struct {
@@ -12,7 +13,7 @@ type Plugin struct {
 func NewPlugin() (plugin.TailpipePlugin, error) {
 	p := &Plugin{}
 
-	//time.Sleep(10 * time.Second)
+	time.Sleep(10 * time.Second)
 	// register collections which we support
 	err := p.RegisterCollections(pipes_collection.NewAuditLogCollection)
 	if err != nil {
