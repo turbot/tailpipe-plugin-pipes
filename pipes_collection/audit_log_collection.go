@@ -1,28 +1,25 @@
 package pipes_collection
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
-	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"os"
 	"time"
 
 	"github.com/rs/xid"
 	"github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
 	"github.com/turbot/tailpipe-plugin-sdk/collection"
+	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 )
 
+const AuditLogCollectionIdentifier = "pipes_audit_log"
+
 type AuditLogCollection struct {
 	// all collections must embed collection.Base
-	collection.Base
-
-	// the collection config
-	Config *pipes_types.AuditLogCollectionConfig
+	collection.Base[pipes_types.AuditLogCollectionConfig]
 }
 
 func NewAuditLogCollection() plugin.Collection {
@@ -30,45 +27,17 @@ func NewAuditLogCollection() plugin.Collection {
 }
 
 func (c *AuditLogCollection) Identifier() string {
-	return "pipes_audit_log"
+	return AuditLogCollectionIdentifier
 }
 
-// GetRowStruct implements Collection
+func (c *AuditLogCollection) SupportedSources() []string {
+	return []string{pipes_source.AuditLogAPISourceIdentifier}
+}
+
+// GetRowSchema implements Collection
 // return an instance of the row struct
 func (c *AuditLogCollection) GetRowSchema() any {
 	return pipes_types.AuditLogRow{}
-}
-
-func (c *AuditLogCollection) GetConfigSchema() any {
-	return &pipes_types.AuditLogCollectionConfig{}
-}
-
-// Init implements Collection
-func (c *AuditLogCollection) Init(ctx context.Context, configData []byte) error {
-	// TEMP - this will actually parse (or the base will)
-	// unmarshal the config
-	config := &pipes_types.AuditLogCollectionConfig{
-		Token: os.Getenv("PIPES_TOKEN"),
-	}
-	//err := json.Unmarshal(configData, config)
-	//if err != nil {
-	//	return fmt.Errorf("error unmarshalling config: %w", err)
-	//}
-
-	// todo #config- parse config as hcl
-	c.Config = config
-	// todo validate config
-
-	// todo create source from config
-	source, err := c.getSource(c.Config)
-	if err != nil {
-		return err
-	}
-	return c.AddSource(source)
-}
-
-func (c *AuditLogCollection) getSource(config *pipes_types.AuditLogCollectionConfig) (plugin.RowSource, error) {
-	return pipes_source.NewAuditLogAPISource(config), nil
 }
 
 func (c *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
@@ -137,4 +106,11 @@ func (c *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichme
 	record.TenantId = item.TenantId
 
 	return record, nil
+}
+
+func (c *AuditLogCollection) validateConfig(config pipes_types.AuditLogCollectionConfig) error {
+	if config.Token == "" {
+		return fmt.Errorf("token must be provided in AuditLogCollectionConfig")
+	}
+	return nil
 }

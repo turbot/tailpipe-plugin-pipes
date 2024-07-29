@@ -2,6 +2,7 @@ package pipes
 
 import (
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
+	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"time"
 )
@@ -20,7 +21,7 @@ func NewPlugin() (plugin.TailpipePlugin, error) {
 		return nil, err
 	}
 
-	//p.RegisterSources(pipes_source.NewAuditLogAPISource)
+	p.RegisterSources(pipes_source.NewAuditLogAPISource)
 
 	return p, nil
 }

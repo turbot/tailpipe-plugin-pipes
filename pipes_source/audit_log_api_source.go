@@ -5,31 +5,29 @@ import (
 	"fmt"
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
-	"github.com/turbot/tailpipe-plugin-sdk/artifact"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/paging"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 )
 
+const AuditLogAPISourceIdentifier = "pipes_audit_log_api_source"
+
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
-	row_source.Base
-	Config *pipes_types.AuditLogCollectionConfig
+	row_source.Base[pipes_types.AuditLogCollectionConfig]
 }
 
 func (s *AuditLogAPISource) GetPagingData() paging.Data {
 	return nil
 }
 
-func NewAuditLogAPISource(config *pipes_types.AuditLogCollectionConfig) plugin.RowSource {
-	return &AuditLogAPISource{
-		Config: config,
-	}
+func NewAuditLogAPISource() row_source.RowSource {
+	return &AuditLogAPISource{}
 }
 
 func (s *AuditLogAPISource) Identifier() string {
-	return "pipes_audit_log_api_source"
+	return AuditLogAPISourceIdentifier
 }
 
 func (s *AuditLogAPISource) Collect(ctx context.Context) error {
@@ -80,7 +78,6 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 			// TODO PAGING DATA
 			for _, item := range *response.Items {
 				// populate artifact data
-				row := &artifact.ArtifactData{Data: item, Metadata: sourceEnrichmentFields}
 				if err := s.OnRow(ctx, row, nil); err != nil {
 					return fmt.Errorf("error processing row: %w", err)
 				}
