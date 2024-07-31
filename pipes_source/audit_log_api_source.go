@@ -15,7 +15,7 @@ const AuditLogAPISourceIdentifier = "pipes_audit_log_api_source"
 
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
-	row_source.Base[pipes_types.AuditLogCollectionConfig]
+	row_source.RowSourceBase[pipes_types.AuditLogCollectionConfig]
 }
 
 func (s *AuditLogAPISource) GetPagingData() paging.Data {

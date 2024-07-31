@@ -17,8 +17,8 @@ import (
 const AuditLogCollectionIdentifier = "pipes_audit_log"
 
 type AuditLogCollection struct {
-	// all collections must embed collection.Base
-	collection.Base[pipes_types.AuditLogCollectionConfig]
+	// all collections must embed collection.CollectionBase
+	collection.CollectionBase[pipes_types.AuditLogCollectionConfig]
 }
 
 func NewAuditLogCollection() collection.Collection {

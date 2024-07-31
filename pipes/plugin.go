@@ -11,7 +11,7 @@ import (
 )
 
 type Plugin struct {
-	plugin.Base
+	plugin.PluginBase
 }
 
 func NewPlugin() (plugin.TailpipePlugin, error) {
