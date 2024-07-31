@@ -12,7 +12,6 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/collection"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
-	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 )
 
 const AuditLogCollectionIdentifier = "pipes_audit_log"
@@ -22,7 +21,7 @@ type AuditLogCollection struct {
 	collection.Base[pipes_types.AuditLogCollectionConfig]
 }
 
-func NewAuditLogCollection() plugin.Collection {
+func NewAuditLogCollection() collection.Collection {
 	return &AuditLogCollection{}
 }
 
