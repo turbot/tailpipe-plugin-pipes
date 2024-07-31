@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
-	"github.com/turbot/tailpipe-plugin-sdk/artifact"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/paging"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
+	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
 const AuditLogAPISourceIdentifier = "pipes_audit_log_api_source"
@@ -78,7 +78,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 			// TODO PAGING DATA
 			for _, item := range *response.Items {
 				// populate artifact data
-				row := &artifact.ArtifactData{Data: item, Metadata: sourceEnrichmentFields}
+				row := &types.RowData{Data: item, Metadata: sourceEnrichmentFields}
 				if err := s.OnRow(ctx, row, nil); err != nil {
 					return fmt.Errorf("error processing row: %w", err)
 				}

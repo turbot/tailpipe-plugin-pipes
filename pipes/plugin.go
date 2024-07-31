@@ -3,6 +3,7 @@ package pipes
 import (
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_collection"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
+	"github.com/turbot/tailpipe-plugin-sdk/interfaces"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"time"
 )
@@ -11,7 +12,7 @@ type Plugin struct {
 	plugin.Base
 }
 
-func NewPlugin() (plugin.TailpipePlugin, error) {
+func NewPlugin() (interfaces.TailpipePlugin, error) {
 	p := &Plugin{}
 
 	time.Sleep(10 * time.Second)
