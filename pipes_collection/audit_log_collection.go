@@ -3,6 +3,7 @@ package pipes_collection
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/turbot/tailpipe-plugin-sdk/hcl"
 	"time"
 
 	"github.com/rs/xid"
@@ -17,7 +18,7 @@ const AuditLogCollectionIdentifier = "pipes_audit_log"
 
 type AuditLogCollection struct {
 	// all collections must embed collection.CollectionBase
-	collection.CollectionBase[pipes_types.AuditLogCollectionConfig]
+	collection.CollectionBase[*pipes_types.AuditLogCollectionConfig]
 }
 
 func NewAuditLogCollection() collection.Collection {
@@ -32,6 +33,10 @@ func (c *AuditLogCollection) Identifier() string {
 // return an instance of the row struct
 func (c *AuditLogCollection) GetRowSchema() any {
 	return pipes_types.AuditLogRow{}
+}
+
+func (c *AuditLogCollection) GetConfigSchema() hcl.Config {
+	return &pipes_types.AuditLogCollectionConfig{}
 }
 
 func (c *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
@@ -100,11 +105,4 @@ func (c *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichme
 	record.TenantId = item.TenantId
 
 	return record, nil
-}
-
-func (c *AuditLogCollection) validateConfig(config pipes_types.AuditLogCollectionConfig) error {
-	if config.Token == "" {
-		return fmt.Errorf("token must be provided in AuditLogCollectionConfig")
-	}
-	return nil
 }

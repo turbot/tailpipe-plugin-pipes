@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/turbot/pipes-sdk-go"
-	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"github.com/turbot/tailpipe-plugin-sdk/hcl"
 	"github.com/turbot/tailpipe-plugin-sdk/paging"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
@@ -15,7 +15,7 @@ const AuditLogAPISourceIdentifier = "pipes_audit_log_api_source"
 
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
-	row_source.RowSourceBase[pipes_types.AuditLogCollectionConfig]
+	row_source.RowSourceBase[*AuditLogAPISourceConfig]
 }
 
 func (s *AuditLogAPISource) GetPagingData() paging.Data {
@@ -28,6 +28,10 @@ func NewAuditLogAPISource() row_source.RowSource {
 
 func (s *AuditLogAPISource) Identifier() string {
 	return AuditLogAPISourceIdentifier
+}
+
+func (s *AuditLogAPISource) GetConfigSchema() hcl.Config {
+	return &AuditLogAPISourceConfig{}
 }
 
 func (s *AuditLogAPISource) Collect(ctx context.Context) error {
