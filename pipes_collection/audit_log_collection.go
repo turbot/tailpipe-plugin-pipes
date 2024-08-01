@@ -7,7 +7,6 @@ import (
 
 	"github.com/rs/xid"
 	"github.com/turbot/pipes-sdk-go"
-	"github.com/turbot/tailpipe-plugin-pipes/pipes_source"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
 	"github.com/turbot/tailpipe-plugin-sdk/collection"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
@@ -27,10 +26,6 @@ func NewAuditLogCollection() collection.Collection {
 
 func (c *AuditLogCollection) Identifier() string {
 	return AuditLogCollectionIdentifier
-}
-
-func (c *AuditLogCollection) SupportedSources() []string {
-	return []string{pipes_source.AuditLogAPISourceIdentifier}
 }
 
 // GetRowSchema implements Collection
