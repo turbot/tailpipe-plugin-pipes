@@ -11,7 +11,7 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
-const AuditLogAPISourceIdentifier = "pipes_audit_log_api_source"
+const AuditLogAPISourceIdentifier = "pipes_audit_log_api"
 
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
