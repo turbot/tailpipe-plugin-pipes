@@ -2,11 +2,12 @@ package pipes_source
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/hcl"
-	"github.com/turbot/tailpipe-plugin-sdk/paging"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
@@ -18,8 +19,8 @@ type AuditLogAPISource struct {
 	row_source.RowSourceBase[*AuditLogAPISourceConfig]
 }
 
-func (s *AuditLogAPISource) GetPagingData() paging.Data {
-	return nil
+func (s *AuditLogAPISource) GetPagingData() (json.RawMessage, error) {
+	return nil, nil
 }
 
 func NewAuditLogAPISource() row_source.RowSource {
