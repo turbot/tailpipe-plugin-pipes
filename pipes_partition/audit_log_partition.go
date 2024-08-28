@@ -1,45 +1,45 @@
-package pipes_collection
+package pipes_partition
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/turbot/tailpipe-plugin-sdk/hcl"
 	"time"
 
 	"github.com/rs/xid"
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
+	"github.com/turbot/tailpipe-plugin-sdk/parse"
+	"github.com/turbot/tailpipe-plugin-sdk/partition"
 )
 
-const AuditLogCollectionIdentifier = "pipes_audit_log"
+const AuditLogPartitionIdentifier = "pipes_audit_log"
 
-type AuditLogCollection struct {
-	// all collections must embed collection.CollectionBase
-	collection.CollectionBase[*pipes_types.AuditLogCollectionConfig]
+type AuditLogPartition struct {
+	// all partitions must embed partition.PartitionBase
+	partition.PartitionBase[*pipes_types.AuditLogPartitionConfig]
 }
 
-func NewAuditLogCollection() collection.Collection {
-	return &AuditLogCollection{}
+func NewAuditLogCollection() partition.Partition {
+	return &AuditLogPartition{}
 }
 
-func (c *AuditLogCollection) Identifier() string {
-	return AuditLogCollectionIdentifier
+func (c *AuditLogPartition) Identifier() string {
+	return AuditLogPartitionIdentifier
 }
 
-// GetRowSchema implements Collection
+// GetRowSchema implements Partition
 // return an instance of the row struct
-func (c *AuditLogCollection) GetRowSchema() any {
+func (c *AuditLogPartition) GetRowSchema() any {
 	return pipes_types.AuditLogRow{}
 }
 
-func (c *AuditLogCollection) GetConfigSchema() hcl.Config {
-	return &pipes_types.AuditLogCollectionConfig{}
+func (c *AuditLogPartition) GetConfigSchema() parse.Config {
+	return &pipes_types.AuditLogPartitionConfig{}
 }
 
-func (c *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
+func (c *AuditLogPartition) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
 	// row must be an AuditRecord
 	item, ok := row.(pipes.AuditRecord)
 	if !ok {
@@ -47,10 +47,10 @@ func (c *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichme
 	}
 	// we expect sourceEnrichmentFields to be set
 	if sourceEnrichmentFields == nil {
-		return nil, fmt.Errorf("AuditLogCollection EnrichRow called with nil sourceEnrichmentFields")
+		return nil, fmt.Errorf("AuditLogPartition EnrichRow called with nil sourceEnrichmentFields")
 	}
 	// we expect connection to be set by the Source
-	if sourceEnrichmentFields == nil || sourceEnrichmentFields.TpConnection == "" {
+	if sourceEnrichmentFields == nil || sourceEnrichmentFields.TpIndex == "" {
 		return nil, fmt.Errorf("Source must provide connection in sourceEnrichmentFields")
 	}
 
@@ -77,7 +77,7 @@ func (c *AuditLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichme
 	record.TpUsernames = append(record.TpUsernames, item.ActorHandle)
 
 	// Set hive fields
-	record.TpCollection = "pipes_audit_log"
+	record.TpPartition = "pipes_audit_log"
 	record.TpYear = int32(tpTimestamp.Year())
 	record.TpMonth = int32(tpTimestamp.Month())
 	record.TpDay = int32(tpTimestamp.Day())

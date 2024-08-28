@@ -7,7 +7,7 @@ import (
 
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/hcl"
+	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
@@ -31,7 +31,7 @@ func (s *AuditLogAPISource) Identifier() string {
 	return AuditLogAPISourceIdentifier
 }
 
-func (s *AuditLogAPISource) GetConfigSchema() hcl.Config {
+func (s *AuditLogAPISource) GetConfigSchema() parse.Config {
 	return &AuditLogAPISourceConfig{}
 }
 
@@ -58,7 +58,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 
 	// populate enrichment fields the the source is aware of
 	// - in this case the connection
-	sourceEnrichmentFields := &enrichment.CommonFields{TpConnection: conn}
+	sourceEnrichmentFields := &enrichment.CommonFields{TpIndex: conn}
 
 	for {
 		listReq := client.Orgs.ListAuditLogs(ctx, orgHandle)
