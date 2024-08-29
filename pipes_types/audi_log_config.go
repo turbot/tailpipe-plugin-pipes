@@ -1,8 +1,8 @@
 package pipes_types
 
-type AuditLogPartitionConfig struct {
+type AuditLogTableConfig struct {
 }
 
-func (c *AuditLogPartitionConfig) Validate() error {
+func (c *AuditLogTableConfig) Validate() error {
 	return nil
 }
