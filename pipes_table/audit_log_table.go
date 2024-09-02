@@ -77,7 +77,7 @@ func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.Co
 	record.TpUsernames = append(record.TpUsernames, item.ActorHandle)
 
 	// Set hive fields
-	record.TpTable = "pipes_audit_log"
+	record.TpPartition = "pipes_audit_log"
 	record.TpYear = int32(tpTimestamp.Year())
 	record.TpMonth = int32(tpTimestamp.Month())
 	record.TpDay = int32(tpTimestamp.Day())
