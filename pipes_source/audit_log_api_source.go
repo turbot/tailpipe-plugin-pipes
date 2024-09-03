@@ -47,8 +47,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 
 	nextToken := ""
 
-	// TODO - fix me
-	orgHandle := "turbot-ops"
+	orgHandle := s.Config.OrgHandle
 
 	conn := client.GetConfig().Host
 	if conn == "" {
@@ -56,9 +55,9 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 	}
 	conn = conn + ":" + orgHandle
 
-	// populate enrichment fields the the source is aware of
+	// populate enrichment fields the source is aware of
 	// - in this case the connection
-	sourceEnrichmentFields := &enrichment.CommonFields{TpIndex: conn}
+	sourceEnrichmentFields := &enrichment.CommonFields{TpIndex: conn, TpSourceType: AuditLogAPISourceIdentifier}
 
 	for {
 		listReq := client.Orgs.ListAuditLogs(ctx, orgHandle)

@@ -18,7 +18,7 @@ const AuditLogTableIdentifier = "pipes_audit_log"
 
 type AuditLogTable struct {
 	// all tables must embed table.TableBase
-	table.TableBase[*pipes_types.AuditLogTableConfig]
+	table.TableBase[*AuditLogTableConfig]
 }
 
 func NewAuditLogCollection() table.Table {
@@ -36,7 +36,7 @@ func (c *AuditLogTable) GetRowSchema() any {
 }
 
 func (c *AuditLogTable) GetConfigSchema() parse.Config {
-	return &pipes_types.AuditLogTableConfig{}
+	return &AuditLogTableConfig{}
 }
 
 func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {

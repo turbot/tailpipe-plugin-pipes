@@ -1,9 +1,17 @@
 package pipes_source
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/hashicorp/hcl/v2"
+)
 
 type AuditLogAPISourceConfig struct {
-	Token string `json:"token"`
+	// required to allow partial decoding
+	Remain hcl.Body `hcl:",remain" json:"-"`
+
+	Token     string `json:"token" hcl:"token"`
+	OrgHandle string `json:"org_handle" hcl:"org_handle"`
 }
 
 func (c *AuditLogAPISourceConfig) Validate() error {
