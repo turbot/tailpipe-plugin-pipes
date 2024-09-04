@@ -1,6 +1,8 @@
 package pipes_types
 
 import (
+	"time"
+
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 )
@@ -17,7 +19,7 @@ type AuditLogRow struct {
 	ActorHandle      string              `json:"actor_handle"`
 	ActorId          string              `json:"actor_id"`
 	ActorIp          string              `json:"actor_ip"`
-	CreatedAt        helpers.UnixMillis  `json:"created_at"`
+	CreatedAt        time.Time           `json:"created_at"`
 	Data             *helpers.JSONString `json:"data"`
 	Id               string              `json:"id"`
 	IdentityHandle   string              `json:"identity_handle"`

@@ -89,7 +89,7 @@ func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.Co
 	record.ActorHandle = item.ActorHandle
 	record.ActorId = item.ActorId
 	record.ActorIp = item.ActorIp
-	record.CreatedAt = record.TpTimestamp
+	record.CreatedAt = tpTimestamp
 	s, err := json.Marshal(item.Data)
 	if err != nil {
 		panic(err)
