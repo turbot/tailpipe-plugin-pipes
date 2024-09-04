@@ -18,5 +18,8 @@ func (c *AuditLogAPISourceConfig) Validate() error {
 	if c.Token == "" {
 		return fmt.Errorf("token is required")
 	}
+	if c.OrgHandle == "" {
+		return fmt.Errorf("org_handle is required")
+	}
 	return nil
 }

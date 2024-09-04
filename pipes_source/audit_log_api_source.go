@@ -2,8 +2,9 @@ package pipes_source
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"log/slog"
+	"time"
 
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
@@ -19,12 +20,16 @@ type AuditLogAPISource struct {
 	row_source.RowSourceBase[*AuditLogAPISourceConfig]
 }
 
-func (s *AuditLogAPISource) GetPagingData() (json.RawMessage, error) {
-	return nil, nil
-}
-
 func NewAuditLogAPISource() row_source.RowSource {
 	return &AuditLogAPISource{}
+}
+
+func (s *AuditLogAPISource) Init(ctx context.Context, configData *parse.Data, opts ...row_source.RowSourceOption) error {
+	// set the collection state ctor
+	s.SetCollectionStateFunc(NewAuditLogAPICollectionState)
+
+	// call base init
+	return s.RowSourceBase.Init(ctx, configData, opts...)
 }
 
 func (s *AuditLogAPISource) Identifier() string {
@@ -36,6 +41,12 @@ func (s *AuditLogAPISource) GetConfigSchema() parse.Config {
 }
 
 func (s *AuditLogAPISource) Collect(ctx context.Context) error {
+	// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtain item.
+	collectionState := s.CollectionState.(*AuditLogAPICollectionState)
+	collectionState.StartCollection() // sets previous state to current state as we manipulate the current state
+
+	var nextToken string
+
 	// Create a default configuration
 	configuration := pipes.NewConfiguration()
 
@@ -45,10 +56,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 	// Create a client
 	client := pipes.NewAPIClient(configuration)
 
-	nextToken := ""
-
 	orgHandle := s.Config.OrgHandle
-
 	conn := client.GetConfig().Host
 	if conn == "" {
 		conn = "pipes.turbot.com"
@@ -65,25 +73,41 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 			listReq = listReq.NextToken(nextToken)
 		}
 
-		fmt.Println("Request with NextToken: ", nextToken)
+		slog.Debug("Request with NextToken: ", nextToken)
 
 		listReq = listReq.Limit(100)
 
 		response, _, err := listReq.Execute()
 		if err != nil {
-			// Do something with the error
-			panic(err)
+			return fmt.Errorf("error obtaining audit logs: %v", err)
 		}
 
+		// Checks we have items, and that we have not processed all items previously
 		if response.HasItems() {
+			items := *response.Items
 
-			fmt.Printf("Response item count: %d\n", len(*response.Items))
+			for _, item := range items {
+				// get time as time opposed to string
+				createdAt, err := time.Parse(time.RFC3339, item.CreatedAt)
+				if err != nil {
+					return fmt.Errorf("error parsing created_at field to time.Time: %w", err)
+				}
 
-			// TODO PAGING DATA
-			for _, item := range *response.Items {
+				// check if we've hit previous item - return false if we have, return from function
+				if !collectionState.ShouldCollectRow(createdAt, item.Id) {
+					return nil
+				}
 				// populate artifact data
 				row := &types.RowData{Data: item, Metadata: sourceEnrichmentFields}
-				if err := s.OnRow(ctx, row, nil); err != nil {
+
+				// update collection state
+				collectionState.Upsert(createdAt, item.Id)
+				collectionStateJSON, err := s.GetCollectionStateJSON()
+				if err != nil {
+					return fmt.Errorf("error serialising collectionState data: %w", err)
+				}
+
+				if err := s.OnRow(ctx, row, collectionStateJSON); err != nil {
 					return fmt.Errorf("error processing row: %w", err)
 				}
 			}
@@ -94,11 +118,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 		} else {
 			break
 		}
-
 	}
 
-	fmt.Printf("Done!\n")
-
 	return nil
-
 }
