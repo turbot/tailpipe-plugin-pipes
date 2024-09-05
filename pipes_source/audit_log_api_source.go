@@ -26,7 +26,7 @@ func NewAuditLogAPISource() row_source.RowSource {
 
 func (s *AuditLogAPISource) Init(ctx context.Context, configData *parse.Data, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
-	s.SetCollectionStateFunc(NewAuditLogAPICollectionState)
+	s.NewCollectionStateFunc = NewAuditLogAPICollectionState
 
 	// call base init
 	return s.RowSourceBase.Init(ctx, configData, opts...)

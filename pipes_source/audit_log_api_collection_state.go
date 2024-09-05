@@ -22,8 +22,12 @@ type AuditLogAPICollectionState struct {
 	//Offset      int    `json:"offset"`
 }
 
-func NewAuditLogAPICollectionState() collection_state.CollectionState {
+func NewAuditLogAPICollectionState() collection_state.CollectionState[*AuditLogAPISourceConfig] {
 	return &AuditLogAPICollectionState{}
+}
+
+func (s *AuditLogAPICollectionState) Init(*AuditLogAPISourceConfig) error {
+	return nil
 }
 
 func (s *AuditLogAPICollectionState) IsEmpty() bool {
