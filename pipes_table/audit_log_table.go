@@ -78,9 +78,7 @@ func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.Co
 
 	// Set hive fields
 	record.TpPartition = "pipes_audit_log"
-	record.TpYear = int32(tpTimestamp.Year())
-	record.TpMonth = int32(tpTimestamp.Month())
-	record.TpDay = int32(tpTimestamp.Day())
+	record.TpDate = tpTimestamp.Format("2006-01-02")
 
 	// Record data
 	record.ActionType = item.ActionType
