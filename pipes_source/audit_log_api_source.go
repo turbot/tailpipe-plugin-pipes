@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
@@ -26,7 +27,7 @@ func NewAuditLogAPISource() row_source.RowSource {
 
 func (s *AuditLogAPISource) Init(ctx context.Context, configData *parse.Data, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
-	s.NewCollectionStateFunc = NewAuditLogAPICollectionState
+	s.NewCollectionStateFunc = collection_state.NewGenericCollectionState
 
 	// call base init
 	return s.RowSourceBase.Init(ctx, configData, opts...)
@@ -41,9 +42,13 @@ func (s *AuditLogAPISource) GetConfigSchema() parse.Config {
 }
 
 func (s *AuditLogAPISource) Collect(ctx context.Context) error {
-	// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtain item.
-	collectionState := s.CollectionState.(*AuditLogAPICollectionState)
-	collectionState.StartCollection() // sets previous state to current state as we manipulate the current state
+	// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtained item.
+	collectionState := s.CollectionState.(*collection_state.GenericCollectionState[*AuditLogAPISourceConfig])
+	// TODO: #config the below should be settable via a config option
+	collectionState.IsChronological = false
+	collectionState.HasContinuation = false
+	// TODO: #collectionState is there a way we can call StartCollection/EndCollection from elsewhere to enforce it?
+	collectionState.StartCollection()
 
 	var nextToken string
 
@@ -94,14 +99,16 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 				}
 
 				// check if we've hit previous item - return false if we have, return from function
+				// TODO: #collectionState this will fill until we hit record in previous state, but what if we have gaps? [incoming data] -> [data]ENDS-HERE -> [gap] -> [data]
 				if !collectionState.ShouldCollectRow(createdAt, item.Id) {
+					collectionState.EndCollection()
 					return nil
 				}
 				// populate artifact data
 				row := &types.RowData{Data: item, Metadata: sourceEnrichmentFields}
 
 				// update collection state
-				collectionState.Upsert(createdAt, item.Id)
+				collectionState.Upsert(createdAt, item.Id, nil)
 				collectionStateJSON, err := s.GetCollectionStateJSON()
 				if err != nil {
 					return fmt.Errorf("error serialising collectionState data: %w", err)
@@ -120,5 +127,6 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 		}
 	}
 
+	collectionState.EndCollection()
 	return nil
 }
