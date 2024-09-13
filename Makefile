@@ -1,7 +1,7 @@
 # Paths
 PLUGIN_NAME=tailpipe-plugin-pipes.plugin
 PLUGIN_NAME=tailpipe-plugin-pipes.plugin
-PLUGIN_DIR=~/.tailpipe/plugins/
+PLUGIN_DIR=~/.tailpipe/plugins/hub.tailpipe.io/plugins/turbot/pipes@latest/
 
 # Build in development mode by default
 .PHONY: default
