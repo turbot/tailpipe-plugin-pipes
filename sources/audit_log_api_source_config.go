@@ -1,4 +1,4 @@
-package pipes_source
+package sources
 
 import (
 	"fmt"

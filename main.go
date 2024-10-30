@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log/slog"
+
 	"github.com/turbot/tailpipe-plugin-pipes/pipes"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
-	"log/slog"
 )
 
 func main() {

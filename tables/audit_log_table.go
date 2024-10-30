@@ -1,4 +1,4 @@
-package pipes_table
+package tables
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/rs/xid"
 	"github.com/turbot/pipes-sdk-go"
-	"github.com/turbot/tailpipe-plugin-pipes/pipes_types"
+	"github.com/turbot/tailpipe-plugin-pipes/models"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
@@ -32,7 +32,7 @@ func (c *AuditLogTable) Identifier() string {
 // GetRowSchema implements Table
 // return an instance of the row struct
 func (c *AuditLogTable) GetRowSchema() any {
-	return pipes_types.AuditLogRow{}
+	return models.AuditLog{}
 }
 
 func (c *AuditLogTable) GetConfigSchema() parse.Config {
@@ -54,7 +54,7 @@ func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.Co
 		return nil, fmt.Errorf("Source must provide connection in sourceEnrichmentFields")
 	}
 
-	record := &pipes_types.AuditLogRow{
+	record := &models.AuditLog{
 		CommonFields: *sourceEnrichmentFields,
 	}
 

@@ -1,4 +1,4 @@
-package pipes_table
+package tables
 
 type AuditLogTableConfig struct {
 }
