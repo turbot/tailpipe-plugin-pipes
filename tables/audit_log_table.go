@@ -57,7 +57,7 @@ func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.Co
 	// id & Hive fields
 	item.TpID = xid.New().String()
 	item.TpPartition = AuditLogTableIdentifier // TODO: This should be the name from HCL config once passed in!
-	item.TpIndex = item.ActorId                // TODO: Review if this should be id or handle
+	item.TpIndex = item.IdentityHandle
 	item.TpDate = item.CreatedAt.Format("2006-01-02")
 
 	// Timestamps
