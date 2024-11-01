@@ -1,12 +1,10 @@
 package tables
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/rs/xid"
-	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/models"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
@@ -40,8 +38,8 @@ func (c *AuditLogTable) GetConfigSchema() parse.Config {
 }
 
 func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
-	// row must be an AuditRecord
-	item, ok := row.(pipes.AuditRecord)
+	// row should match expected type
+	item, ok := row.(models.AuditLog)
 	if !ok {
 		return nil, fmt.Errorf("invalid row type %T, expected AuditRecord", row)
 	}
@@ -49,58 +47,35 @@ func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.Co
 	if sourceEnrichmentFields == nil {
 		return nil, fmt.Errorf("AuditLogTable EnrichRow called with nil sourceEnrichmentFields")
 	}
-	// we expect connection to be set by the Source
-	if sourceEnrichmentFields == nil || sourceEnrichmentFields.TpIndex == "" {
-		return nil, fmt.Errorf("Source must provide connection in sourceEnrichmentFields")
+	// we expect name to be set by the Source
+	if sourceEnrichmentFields.TpSourceName == "" {
+		return nil, fmt.Errorf("AuditLogTable EnrichRow called with TpSourceName unset in sourceEnrichmentFields")
 	}
 
-	record := &models.AuditLog{
-		CommonFields: *sourceEnrichmentFields,
+	item.CommonFields = *sourceEnrichmentFields
+
+	// id & Hive fields
+	item.TpID = xid.New().String()
+	item.TpPartition = AuditLogTableIdentifier // TODO: This should be the name from HCL config once passed in!
+	item.TpIndex = item.ActorId                // TODO: Review if this should be id or handle
+	item.TpDate = item.CreatedAt.Format("2006-01-02")
+
+	// Timestamps
+	item.TpTimestamp = helpers.UnixMillis(item.CreatedAt.UnixNano() / int64(time.Millisecond))
+	item.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
+
+	// Other Enrichment Fields
+	if item.ActorIp != "" {
+		item.TpSourceIP = &item.ActorIp
+		item.TpIps = append(item.TpIps, item.ActorIp)
 	}
 
-	// Record standardization
-	record.TpID = xid.New().String()
-	record.TpSourceType = "pipes_audit_log"
-	tpTimestamp, err := time.Parse(time.RFC3339, item.CreatedAt)
-	if err != nil {
-		return nil, err
-	}
-	record.TpTimestamp = helpers.UnixMillis(tpTimestamp.UnixNano() / int64(time.Millisecond))
-	record.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
-	if record.ActorIp != "" {
-		record.TpSourceIP = &item.ActorIp
-		record.TpIps = append(record.TpIps, item.ActorIp)
-	}
 	if item.TargetId != nil {
-		record.TpAkas = append(record.TpAkas, *item.TargetId)
+		item.TpAkas = append(item.TpAkas, *item.TargetId)
+		// TODO: Should item.ProcessId be added to TpAkas?
 	}
-	record.TpUsernames = append(record.TpUsernames, item.ActorHandle)
 
-	// Set hive fields
-	record.TpPartition = "pipes_audit_log"
-	record.TpDate = tpTimestamp.Format("2006-01-02")
+	item.TpUsernames = append(item.TpUsernames, item.ActorHandle, item.ActorId)
 
-	// Record data
-	record.ActionType = item.ActionType
-	record.ActorAvatarUrl = item.ActorAvatarUrl
-	record.ActorDisplayName = item.ActorDisplayName
-	record.ActorHandle = item.ActorHandle
-	record.ActorId = item.ActorId
-	record.ActorIp = item.ActorIp
-	record.CreatedAt = tpTimestamp
-	s, err := json.Marshal(item.Data)
-	if err != nil {
-		panic(err)
-	}
-	js := helpers.JSONString(s)
-	record.Data = &js
-	record.Id = item.Id
-	record.IdentityHandle = item.IdentityHandle
-	record.IdentityId = item.IdentityId
-	record.ProcessId = item.ProcessId
-	record.TargetHandle = item.TargetHandle
-	record.TargetId = item.TargetId
-	record.TenantId = item.TenantId
-
-	return record, nil
+	return item, nil
 }

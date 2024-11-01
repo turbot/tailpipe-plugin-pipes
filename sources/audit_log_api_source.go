@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/tailpipe-plugin-pipes/models"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
@@ -70,7 +71,11 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 
 	// populate enrichment fields the source is aware of
 	// - in this case the connection
-	sourceEnrichmentFields := &enrichment.CommonFields{TpIndex: conn, TpSourceType: AuditLogAPISourceIdentifier}
+	sourceEnrichmentFields := &enrichment.CommonFields{
+		TpSourceName:     AuditLogAPISourceIdentifier,
+		TpSourceType:     AuditLogAPISourceIdentifier, // TODO: review this
+		TpSourceLocation: &conn,
+	}
 
 	for {
 		listReq := client.Orgs.ListAuditLogs(ctx, orgHandle)
@@ -98,14 +103,19 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 					return fmt.Errorf("error parsing created_at field to time.Time: %w", err)
 				}
 
-				// check if we've hit previous item - return false if we have, return from function
+				// check if we've hit previous item - end collection and return if we have
 				// TODO: #collectionState this will fill until we hit record in previous state, but what if we have gaps? [incoming data] -> [data]ENDS-HERE -> [gap] -> [data]
 				if !collectionState.ShouldCollectRow(createdAt, item.Id) {
 					collectionState.EndCollection()
 					return nil
 				}
+				rowData := models.AuditLog{}
+				err = rowData.MapFromPipesAuditRecord(item)
+				if err != nil {
+					return fmt.Errorf("error converting audit log item to row data: %w", err)
+				}
 				// populate artifact data
-				row := &types.RowData{Data: item, Metadata: sourceEnrichmentFields}
+				row := &types.RowData{Data: rowData, Metadata: sourceEnrichmentFields}
 
 				// update collection state
 				collectionState.Upsert(createdAt, item.Id, nil)
