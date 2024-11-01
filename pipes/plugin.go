@@ -13,7 +13,7 @@ func NewPlugin() (plugin.TailpipePlugin, error) {
 
 	// register the tables, sources and mappers that we provide
 	resources := &plugin.ResourceFunctions{
-		Tables:  []func() table.Table{tables.NewAuditLogCollection},
+		Tables:  []func() table.Table{tables.NewAuditLogTable},
 		Sources: []func() row_source.RowSource{sources.NewAuditLogAPISource},
 	}
 

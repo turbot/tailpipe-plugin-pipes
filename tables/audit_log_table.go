@@ -19,7 +19,7 @@ type AuditLogTable struct {
 	table.TableBase[*AuditLogTableConfig]
 }
 
-func NewAuditLogCollection() table.Table {
+func NewAuditLogTable() table.Table {
 	return &AuditLogTable{}
 }
 
