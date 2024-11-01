@@ -2,6 +2,7 @@ package tables
 
 import (
 	"fmt"
+	"github.com/turbot/tailpipe-plugin-pipes/config"
 	"time"
 
 	"github.com/rs/xid"
@@ -16,7 +17,7 @@ const AuditLogTableIdentifier = "pipes_audit_log"
 
 type AuditLogTable struct {
 	// all tables must embed table.TableBase
-	table.TableBase[*AuditLogTableConfig]
+	table.TableBase[*AuditLogTableConfig, *config.PipesConnection]
 }
 
 func NewAuditLogTable() table.Table {
