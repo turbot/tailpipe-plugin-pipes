@@ -1,6 +1,7 @@
 package pipes
 
 import (
+	"github.com/turbot/tailpipe-plugin-pipes/config"
 	"github.com/turbot/tailpipe-plugin-pipes/sources"
 	"github.com/turbot/tailpipe-plugin-pipes/tables"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
@@ -8,8 +9,14 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
+type Plugin struct {
+	plugin.PluginBase
+}
+
 func NewPlugin() (plugin.TailpipePlugin, error) {
-	p := plugin.NewPlugin("pipes")
+	p := &Plugin{
+		PluginBase: plugin.NewPluginBase("pipes", config.NewPipesConnection),
+	}
 
 	// register the tables, sources and mappers that we provide
 	resources := &plugin.ResourceFunctions{
