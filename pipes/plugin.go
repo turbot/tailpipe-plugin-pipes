@@ -10,12 +10,12 @@ import (
 )
 
 type Plugin struct {
-	plugin.PluginBase
+	plugin.PluginImpl
 }
 
 func NewPlugin() (plugin.TailpipePlugin, error) {
 	p := &Plugin{
-		PluginBase: plugin.NewPluginBase("pipes", config.NewPipesConnection),
+		PluginImpl: plugin.NewPluginImpl("pipes", config.NewPipesConnection),
 	}
 
 	// register the tables, sources and mappers that we provide

@@ -16,8 +16,8 @@ import (
 const AuditLogTableIdentifier = "pipes_audit_log"
 
 type AuditLogTable struct {
-	// all tables must embed table.TableBase
-	table.TableBase[*AuditLogTableConfig, *config.PipesConnection]
+	// all tables must embed table.TableImpl
+	table.TableImpl[*AuditLogTableConfig, *config.PipesConnection]
 }
 
 func NewAuditLogTable() table.Table {
@@ -42,7 +42,7 @@ func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.Co
 	// row should match expected type
 	item, ok := row.(models.AuditLog)
 	if !ok {
-		return nil, fmt.Errorf("invalid row type %T, expected AuditRecord", row)
+		return nil, fmt.Errorf("invalid row type %S, expected AuditRecord", row)
 	}
 	// we expect sourceEnrichmentFields to be set
 	if sourceEnrichmentFields == nil {
