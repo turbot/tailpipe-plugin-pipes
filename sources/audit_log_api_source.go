@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/turbot/pipes-sdk-go"
-	"github.com/turbot/tailpipe-plugin-pipes/models"
+	"github.com/turbot/tailpipe-plugin-pipes/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
@@ -109,7 +109,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 					collectionState.EndCollection()
 					return nil
 				}
-				rowData := models.AuditLog{}
+				rowData := &rows.AuditLog{}
 				err = rowData.MapFromPipesAuditRecord(item)
 				if err != nil {
 					return fmt.Errorf("error converting audit log item to row data: %w", err)
@@ -125,6 +125,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 				}
 
 				if err := s.OnRow(ctx, row, collectionStateJSON); err != nil {
+					// TODO K #errorHandling - this does not bubble up
 					return fmt.Errorf("error processing row: %w", err)
 				}
 			}

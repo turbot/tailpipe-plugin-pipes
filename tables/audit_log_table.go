@@ -2,11 +2,11 @@ package tables
 
 import (
 	"fmt"
-	"github.com/turbot/tailpipe-plugin-pipes/config"
 	"time"
 
 	"github.com/rs/xid"
-	"github.com/turbot/tailpipe-plugin-pipes/models"
+	"github.com/turbot/tailpipe-plugin-pipes/config"
+	"github.com/turbot/tailpipe-plugin-pipes/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
@@ -17,7 +17,7 @@ const AuditLogTableIdentifier = "pipes_audit_log"
 
 type AuditLogTable struct {
 	// all tables must embed table.TableImpl
-	table.TableImpl[*AuditLogTableConfig, *config.PipesConnection]
+	table.TableImpl[*rows.AuditLog, *AuditLogTableConfig, *config.PipesConnection]
 }
 
 func NewAuditLogTable() table.Table {
@@ -31,19 +31,14 @@ func (c *AuditLogTable) Identifier() string {
 // GetRowSchema implements Table
 // return an instance of the row struct
 func (c *AuditLogTable) GetRowSchema() any {
-	return models.AuditLog{}
+	return rows.AuditLog{}
 }
 
 func (c *AuditLogTable) GetConfigSchema() parse.Config {
 	return &AuditLogTableConfig{}
 }
 
-func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
-	// row should match expected type
-	item, ok := row.(models.AuditLog)
-	if !ok {
-		return nil, fmt.Errorf("invalid row type %S, expected AuditRecord", row)
-	}
+func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields *enrichment.CommonFields) (*rows.AuditLog, error) {
 	// we expect sourceEnrichmentFields to be set
 	if sourceEnrichmentFields == nil {
 		return nil, fmt.Errorf("AuditLogTable EnrichRow called with nil sourceEnrichmentFields")
@@ -53,30 +48,30 @@ func (c *AuditLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.Co
 		return nil, fmt.Errorf("AuditLogTable EnrichRow called with TpSourceName unset in sourceEnrichmentFields")
 	}
 
-	item.CommonFields = *sourceEnrichmentFields
+	row.CommonFields = *sourceEnrichmentFields
 
 	// id & Hive fields
-	item.TpID = xid.New().String()
-	item.TpPartition = AuditLogTableIdentifier // TODO: This should be the name from HCL config once passed in!
-	item.TpIndex = item.IdentityHandle
-	item.TpDate = item.CreatedAt.Format("2006-01-02")
+	row.TpID = xid.New().String()
+	row.TpPartition = AuditLogTableIdentifier // TODO: This should be the name from HCL config once passed in!
+	row.TpIndex = row.IdentityHandle
+	row.TpDate = row.CreatedAt.Format("2006-01-02")
 
 	// Timestamps
-	item.TpTimestamp = helpers.UnixMillis(item.CreatedAt.UnixNano() / int64(time.Millisecond))
-	item.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
+	row.TpTimestamp = helpers.UnixMillis(row.CreatedAt.UnixNano() / int64(time.Millisecond))
+	row.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
 
 	// Other Enrichment Fields
-	if item.ActorIp != "" {
-		item.TpSourceIP = &item.ActorIp
-		item.TpIps = append(item.TpIps, item.ActorIp)
+	if row.ActorIp != "" {
+		row.TpSourceIP = &row.ActorIp
+		row.TpIps = append(row.TpIps, row.ActorIp)
 	}
 
-	if item.TargetId != nil {
-		item.TpAkas = append(item.TpAkas, *item.TargetId)
-		// TODO: Should item.ProcessId be added to TpAkas?
+	if row.TargetId != nil {
+		row.TpAkas = append(row.TpAkas, *row.TargetId)
+		// TODO: Should row.ProcessId be added to TpAkas?
 	}
 
-	item.TpUsernames = append(item.TpUsernames, item.ActorHandle, item.ActorId)
+	row.TpUsernames = append(row.TpUsernames, row.ActorHandle, row.ActorId)
 
-	return item, nil
+	return row, nil
 }

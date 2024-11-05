@@ -7,6 +7,8 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
+	//"log/slog"
+	//"time"
 )
 
 type Plugin struct {
@@ -14,6 +16,10 @@ type Plugin struct {
 }
 
 func NewPlugin() (plugin.TailpipePlugin, error) {
+	//slog.Info("Pipes Plugin starting")
+	//time.Sleep(10 * time.Second)
+	//slog.Info("Pipes Plugin started")
+
 	p := &Plugin{
 		PluginImpl: plugin.NewPluginImpl("pipes", config.NewPipesConnection),
 	}
