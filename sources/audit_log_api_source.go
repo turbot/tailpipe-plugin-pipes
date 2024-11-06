@@ -9,6 +9,7 @@ import (
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
+	"github.com/turbot/tailpipe-plugin-sdk/config_data"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
@@ -26,7 +27,7 @@ func NewAuditLogAPISource() row_source.RowSource {
 	return &AuditLogAPISource{}
 }
 
-func (s *AuditLogAPISource) Init(ctx context.Context, configData *types.ConfigData, opts ...row_source.RowSourceOption) error {
+func (s *AuditLogAPISource) Init(ctx context.Context, configData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
 	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
