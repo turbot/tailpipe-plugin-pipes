@@ -52,7 +52,6 @@ func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields *en
 
 	// id & Hive fields
 	row.TpID = xid.New().String()
-	row.TpPartition = AuditLogTableIdentifier // TODO: This should be the name from HCL config once passed in!
 	row.TpIndex = row.IdentityHandle
 	row.TpDate = row.CreatedAt.Format("2006-01-02")
 
