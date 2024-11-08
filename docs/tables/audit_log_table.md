@@ -59,7 +59,7 @@ having
   change_count > 3;
 ```
 
-### Identify Unusual Login Locations by Actor  (0 rows)
+### Identify Unusual Login Locations by Actor
 
 ```sql
 select
@@ -73,7 +73,7 @@ having
   count(distinct tp_source_location) > 3;
 ```
 
-### Monitor for Large Number of Failed or Suspicious Login Attempts (0 rows)
+### Monitor for Large Number of Failed or Suspicious Login Attempts
 
 ```sql
 select
@@ -158,7 +158,7 @@ having
   rapid_actions > 5;
 ```
 
-## Flag Potential Insider Threat by Monitoring for Changes on Sensitive Resources (0 rows)
+## Flag Potential Insider Threat by Monitoring for Changes on Sensitive Resources
 
 ```sql
 select
@@ -176,7 +176,7 @@ having
   sensitive_actions > 3;
 ```
 
-## Identify Accounts with Frequent Changes to Sensitive Settings (0 rows)
+## Identify Accounts with Frequent Changes to Sensitive Settings
 
 ```sql
 select
@@ -208,7 +208,7 @@ group by
   tp_source_location;
 ```
 
-## Track Multiple Failed Attempts to Perform Critical Actions (0 rows)
+## Track Multiple Failed Attempts to Perform Critical Actions
 
 ```sql
 select
@@ -324,7 +324,7 @@ having
   off_hours_actions > 3;
 ```
 
-## Detect Access from Multiple Countries within Short Timeframe (0 rows)
+## Detect Access from Multiple Countries within Short Timeframe
 
 ```sql
 with locations as (
