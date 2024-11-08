@@ -6,7 +6,9 @@
 >  cd ../../testdata/generator
 > ```
 >  duckdb
->  CREATE VIEW pipes_audit_log AS SELECT * FROM read_parquet('pipes-audit-log.parquet');
+> ```
+> ```
+>  CREATE VIEW pipes_audit_log AS SELECT * FROM read_parquet('pipes_audit_log.parquet');
 > ```
 
 ## chatgpt
