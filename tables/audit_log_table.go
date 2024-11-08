@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/rs/xid"
+
 	"github.com/turbot/tailpipe-plugin-pipes/config"
 	"github.com/turbot/tailpipe-plugin-pipes/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
@@ -56,8 +56,8 @@ func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields *en
 	row.TpDate = row.CreatedAt.Format("2006-01-02")
 
 	// Timestamps
-	row.TpTimestamp = helpers.UnixMillis(row.CreatedAt.UnixNano() / int64(time.Millisecond))
-	row.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
+	row.TpTimestamp = row.CreatedAt
+	row.TpIngestTimestamp = time.Now()
 
 	// Other Enrichment Fields
 	if row.ActorIp != "" {
