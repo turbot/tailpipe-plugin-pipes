@@ -3,13 +3,15 @@
 > [!NOTE]
 > To run these against the generated test data:
 >
->  cd ../../testdata
+>  cd ../../testdata/generator
 > ```
 >  duckdb
->  CREATE VIEW pipes_audit_log AS SELECT * FROM read_parquet('audit_logs.parquet');
+>  CREATE VIEW pipes_audit_log AS SELECT * FROM read_parquet('pipes-audit-log.parquet');
 > ```
 
-## Identify Suspicious Activity by Repeated Deletion Actions
+## chatgpt
+
+### Identify Suspicious Activity by Repeated Deletion Actions
 
 ```sql
 select
@@ -25,7 +27,7 @@ having
   delete_count > 5;
 ```
 
-## Detect IP Address Reuse Across Different Identities
+### Detect IP Address Reuse Across Different Identities
 
 ```sql
 select
@@ -39,7 +41,7 @@ having
   count(distinct identity_id) > 1;
 ```
 
-## Track Changes in State for Sensitive Resources
+### Track Changes in State for Sensitive Resources (broken, desired state nested in the json data field)
 
 ```sql
 select
@@ -55,7 +57,7 @@ having
   change_count > 3;
 ```
 
-## Identify Unusual Login Locations by Actor
+### Identify Unusual Login Locations by Actor  (0 rows)
 
 ```sql
 select
@@ -69,7 +71,7 @@ having
   count(distinct tp_source_location) > 3;
 ```
 
-## Monitor for Large Number of Failed or Suspicious Login Attempts
+### Monitor for Large Number of Failed or Suspicious Login Attempts (0 rows)
 
 ```sql
 select
@@ -85,7 +87,7 @@ having
   suspicious_actions > 5;
 ```
 
-## Identify Accounts with Multiple Identifiers (Emails or IPs)
+### Identify Accounts with Multiple Identifiers (Emails or IPs) (broken, Cardinality can only operate on MAPs)
 
 ```sql
 select
@@ -100,7 +102,7 @@ having
   cardinality(usernames) > 1 or cardinality(ips) > 1;
 ```
 
-## Detect High Volume of Activity from Single Source IP
+### Detect High Volume of Activity from Single Source IP (broken)
 
 ```sql
 select
@@ -154,7 +156,7 @@ having
   rapid_actions > 5;
 ```
 
-## Flag Potential Insider Threat by Monitoring for Changes on Sensitive Resources
+## Flag Potential Insider Threat by Monitoring for Changes on Sensitive Resources (0 rows)
 
 ```sql
 select
@@ -172,7 +174,7 @@ having
   sensitive_actions > 3;
 ```
 
-## Identify Accounts with Frequent Changes to Sensitive Settings
+## Identify Accounts with Frequent Changes to Sensitive Settings (0 rows)
 
 ```sql
 select
@@ -204,7 +206,7 @@ group by
   tp_source_location;
 ```
 
-## Track Multiple Failed Attempts to Perform Critical Actions
+## Track Multiple Failed Attempts to Perform Critical Actions (0 rows)
 
 ```sql
 select
@@ -221,7 +223,7 @@ having
   failed_actions > 3;
 ```
 
-## Monitor for Access to Restricted Database Instances
+## Monitor for Access to Restricted Database Instances (broken, database_name is nested)
 
 ```sql
 select
@@ -237,7 +239,7 @@ having
   restricted_access > 0;
 ```
 
-## Identify Sudden Increase in Actions by an Actor
+## Identify Sudden Increase in Actions by an Actor (broken,  Cannot compare values of type VARCHAR and type TIMESTAMP - an explicit cast is required)
 
 ```sql
 with recent_actions as (
@@ -274,7 +276,7 @@ where
   r.recent_count > p.past_count * 2;
 ```
 
-## Detect Use of Outdated API or CLI Versions
+## Detect Use of Outdated API or CLI Versions ( No function matches the given name and argument types 'json_extract(VARCHAR, BOOLEAN)'.)
 
 ```sql
 select
@@ -288,7 +290,7 @@ where
   or data->'cli_version' < '0.20.0';
 ```
 
-## Identify Actions from IP Addresses Known for Suspicious Activity
+## Identify Actions from IP Addresses Known for Suspicious Activity (Conversion Error: Type VARCHAR with value 'suspicious_ip_1' can't be cast to the destination type LIST)
 
 ```sql
 select
@@ -320,7 +322,7 @@ having
   off_hours_actions > 3;
 ```
 
-## Detect Access from Multiple Countries within Short Timeframe
+## Detect Access from Multiple Countries within Short Timeframe (0 rows)
 
 ```sql
 with locations as (
