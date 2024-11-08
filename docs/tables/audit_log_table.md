@@ -4,8 +4,10 @@
 > To run these against the generated test data:
 >
 >  cd ../../testdata
+> ```
 >  duckdb
 >  CREATE VIEW pipes_audit_log AS SELECT * FROM read_parquet('audit_logs.parquet');
+> ```
 
 ## Identify Suspicious Activity by Repeated Deletion Actions
 
