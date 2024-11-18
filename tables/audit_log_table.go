@@ -7,11 +7,17 @@ import (
 	"github.com/rs/xid"
 
 	"github.com/turbot/tailpipe-plugin-pipes/config"
+	"github.com/turbot/tailpipe-plugin-pipes/mappers"
 	"github.com/turbot/tailpipe-plugin-pipes/rows"
+	"github.com/turbot/tailpipe-plugin-pipes/sources"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
+
+// init registers the table
+func init() {
+	table.RegisterTable[*rows.AuditLog, *AuditLogTable]()
+}
 
 const AuditLogTableIdentifier = "pipes_audit_log"
 
@@ -20,22 +26,17 @@ type AuditLogTable struct {
 	table.TableImpl[*rows.AuditLog, *AuditLogTableConfig, *config.PipesConnection]
 }
 
-func NewAuditLogTable() table.Table {
-	return &AuditLogTable{}
-}
-
 func (c *AuditLogTable) Identifier() string {
 	return AuditLogTableIdentifier
 }
 
-// GetRowSchema implements Table
-// return an instance of the row struct
-func (c *AuditLogTable) GetRowSchema() any {
-	return rows.AuditLog{}
-}
-
-func (c *AuditLogTable) GetConfigSchema() parse.Config {
-	return &AuditLogTableConfig{}
+func (c *AuditLogTable) SupportedSources() []*table.SourceMetadata[*rows.AuditLog] {
+	return []*table.SourceMetadata[*rows.AuditLog]{
+		{
+			SourceName: sources.AuditLogAPISourceIdentifier,
+			MapperFunc: mappers.NewAuditLogMapper,
+		},
+	}
 }
 
 func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields *enrichment.CommonFields) (*rows.AuditLog, error) {
@@ -44,7 +45,7 @@ func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields *en
 		return nil, fmt.Errorf("AuditLogTable EnrichRow called with nil sourceEnrichmentFields")
 	}
 	// we expect name to be set by the Source
-	if sourceEnrichmentFields.TpSourceName == "" {
+	if sourceEnrichmentFields.TpSourceName == nil {
 		return nil, fmt.Errorf("AuditLogTable EnrichRow called with TpSourceName unset in sourceEnrichmentFields")
 	}
 
@@ -53,7 +54,7 @@ func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields *en
 	// id & Hive fields
 	row.TpID = xid.New().String()
 	row.TpIndex = row.IdentityHandle
-	row.TpDate = row.CreatedAt.Format("2006-01-02")
+	row.TpDate = row.CreatedAt.Truncate(24 * time.Hour)
 
 	// Timestamps
 	row.TpTimestamp = row.CreatedAt
@@ -67,7 +68,6 @@ func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields *en
 
 	if row.TargetId != nil {
 		row.TpAkas = append(row.TpAkas, *row.TargetId)
-		// TODO: Should row.ProcessId be added to TpAkas?
 	}
 
 	row.TpUsernames = append(row.TpUsernames, row.ActorHandle, row.ActorId)
