@@ -7,24 +7,23 @@ import (
 	"time"
 
 	"github.com/turbot/pipes-sdk-go"
-	"github.com/turbot/tailpipe-plugin-pipes/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/config_data"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
 const AuditLogAPISourceIdentifier = "pipes_audit_log_api"
 
+// init function should register the source
+func init() {
+	row_source.RegisterRowSource[*AuditLogAPISource]()
+}
+
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
 	row_source.RowSourceImpl[*AuditLogAPISourceConfig]
-}
-
-func NewAuditLogAPISource() row_source.RowSource {
-	return &AuditLogAPISource{}
 }
 
 func (s *AuditLogAPISource) Init(ctx context.Context, configData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
@@ -37,10 +36,6 @@ func (s *AuditLogAPISource) Init(ctx context.Context, configData config_data.Con
 
 func (s *AuditLogAPISource) Identifier() string {
 	return AuditLogAPISourceIdentifier
-}
-
-func (s *AuditLogAPISource) GetConfigSchema() parse.Config {
-	return &AuditLogAPISourceConfig{}
 }
 
 func (s *AuditLogAPISource) Collect(ctx context.Context) error {
@@ -72,9 +67,10 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 
 	// populate enrichment fields the source is aware of
 	// - in this case the connection
+	sourceName := AuditLogAPISourceIdentifier
 	sourceEnrichmentFields := &enrichment.CommonFields{
-		TpSourceName:     AuditLogAPISourceIdentifier,
-		TpSourceType:     AuditLogAPISourceIdentifier, // TODO: review this
+		TpSourceName:     &sourceName,
+		TpSourceType:     AuditLogAPISourceIdentifier,
 		TpSourceLocation: &conn,
 	}
 
@@ -110,13 +106,9 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 					collectionState.EndCollection()
 					return nil
 				}
-				rowData := &rows.AuditLog{}
-				err = rowData.MapFromPipesAuditRecord(item)
-				if err != nil {
-					return fmt.Errorf("error converting audit log item to row data: %w", err)
-				}
+
 				// populate artifact data
-				row := &types.RowData{Data: rowData, Metadata: sourceEnrichmentFields}
+				row := &types.RowData{Data: item, Metadata: sourceEnrichmentFields}
 
 				// update collection state
 				collectionState.Upsert(createdAt, item.Id, nil)

@@ -1,11 +1,8 @@
 package rows
 
 import (
-	"encoding/json"
-	"fmt"
 	"time"
 
-	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
@@ -23,7 +20,7 @@ type AuditLog struct {
 	ActorId          string            `json:"actor_id"`
 	ActorIp          string            `json:"actor_ip"`
 	CreatedAt        time.Time         `json:"created_at"`
-	Data             *types.JSONString `json:"data"`
+	Data             *types.JSONString `json:"data" parquet:"type=JSON"`
 	Id               string            `json:"id"`
 	IdentityHandle   string            `json:"identity_handle"`
 	IdentityId       string            `json:"identity_id"`
@@ -31,35 +28,4 @@ type AuditLog struct {
 	TargetHandle     *string           `json:"target_handle,omitempty"`
 	TargetId         *string           `json:"target_id,omitempty"`
 	TenantId         string            `json:"tenant_id"`
-}
-
-func (a *AuditLog) MapFromPipesAuditRecord(record pipes.AuditRecord) error {
-	createdAt, err := time.Parse(time.RFC3339, record.CreatedAt)
-	if err != nil {
-		return fmt.Errorf("error parsing created_at field to time.Time: %w", err)
-	}
-
-	s, err := json.Marshal(record.Data)
-	if err != nil {
-		return fmt.Errorf("error marshalling row data: %w", err)
-	}
-	dataJsonString := types.JSONString(s)
-
-	a.ActionType = record.ActionType
-	a.ActorAvatarUrl = record.ActorAvatarUrl
-	a.ActorDisplayName = record.ActorDisplayName
-	a.ActorHandle = record.ActorHandle
-	a.ActorId = record.ActorId
-	a.ActorIp = record.ActorIp
-	a.CreatedAt = createdAt
-	a.Data = &dataJsonString
-	a.Id = record.Id
-	a.IdentityHandle = record.IdentityHandle
-	a.IdentityId = record.IdentityId
-	a.ProcessId = record.ProcessId
-	a.TargetHandle = record.TargetHandle
-	a.TargetId = record.TargetId
-	a.TenantId = record.TenantId
-
-	return nil
 }
