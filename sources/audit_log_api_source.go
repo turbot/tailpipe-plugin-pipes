@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/tailpipe-plugin-pipes/config"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/config_data"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
@@ -23,15 +24,15 @@ func init() {
 
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
-	row_source.RowSourceImpl[*AuditLogAPISourceConfig]
+	row_source.RowSourceImpl[*AuditLogAPISourceConfig, *config.PipesConnection]
 }
 
-func (s *AuditLogAPISource) Init(ctx context.Context, configData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
+func (s *AuditLogAPISource) Init(ctx context.Context, configData config_data.ConfigData, connectionData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
 	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
 	// call base init
-	return s.RowSourceImpl.Init(ctx, configData, opts...)
+	return s.RowSourceImpl.Init(ctx, configData, connectionData, opts...)
 }
 
 func (s *AuditLogAPISource) Identifier() string {
@@ -53,12 +54,12 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 	configuration := pipes.NewConfiguration()
 
 	// Add your Turbot Pipes user token as an auth header
-	configuration.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", s.Config.Token))
+	configuration.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", s.Connection.Token))
 
 	// Create a client
 	client := pipes.NewAPIClient(configuration)
 
-	orgHandle := s.Config.OrgHandle
+	orgHandle := s.Connection.OrgHandle
 	conn := client.GetConfig().Host
 	if conn == "" {
 		conn = "pipes.turbot.com"
@@ -80,7 +81,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 			listReq = listReq.NextToken(nextToken)
 		}
 
-		slog.Debug("Request with NextToken: ", nextToken)
+		slog.Debug("Request with NextToken: ", "next_token", nextToken)
 
 		listReq = listReq.Limit(100)
 
