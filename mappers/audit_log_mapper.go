@@ -2,14 +2,12 @@ package mappers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
-	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
 type AuditLogMapper struct {
@@ -32,12 +30,6 @@ func (m *AuditLogMapper) Map(_ context.Context, data any) ([]*rows.AuditLog, err
 		return nil, fmt.Errorf("error parsing created_at field to time.Time: %w", err)
 	}
 
-	s, err := json.Marshal(input.Data)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling row data: %w", err)
-	}
-	dataJsonString := types.JSONString(s)
-
 	auditLog.ActionType = input.ActionType
 	auditLog.ActorAvatarUrl = input.ActorAvatarUrl
 	auditLog.ActorDisplayName = input.ActorDisplayName
@@ -45,7 +37,7 @@ func (m *AuditLogMapper) Map(_ context.Context, data any) ([]*rows.AuditLog, err
 	auditLog.ActorId = input.ActorId
 	auditLog.ActorIp = input.ActorIp
 	auditLog.CreatedAt = createdAt
-	auditLog.Data = &dataJsonString
+	auditLog.Data = input.Data
 	auditLog.Id = input.Id
 	auditLog.IdentityHandle = input.IdentityHandle
 	auditLog.IdentityId = input.IdentityId
