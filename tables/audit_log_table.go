@@ -6,7 +6,6 @@ import (
 
 	"github.com/rs/xid"
 
-	"github.com/turbot/tailpipe-plugin-pipes/config"
 	"github.com/turbot/tailpipe-plugin-pipes/mappers"
 	"github.com/turbot/tailpipe-plugin-pipes/rows"
 	"github.com/turbot/tailpipe-plugin-pipes/sources"
@@ -16,21 +15,23 @@ import (
 
 // init registers the table
 func init() {
-	table.RegisterTable[*rows.AuditLog, *AuditLogTable]()
+	// Register the table, with type parameters:
+	// 1. row struct
+	// 2. table config struct
+	// 3. table implementation
+	table.RegisterTable[*rows.AuditLog, *AuditLogTableConfig, *AuditLogTable]()
 }
 
 const AuditLogTableIdentifier = "pipes_audit_log"
 
 type AuditLogTable struct {
-	// all tables must embed table.TableImpl
-	table.TableImpl[*rows.AuditLog, *AuditLogTableConfig, *config.PipesConnection]
 }
 
 func (c *AuditLogTable) Identifier() string {
 	return AuditLogTableIdentifier
 }
 
-func (c *AuditLogTable) SupportedSources() []*table.SourceMetadata[*rows.AuditLog] {
+func (c *AuditLogTable) SupportedSources(_ *AuditLogTableConfig) []*table.SourceMetadata[*rows.AuditLog] {
 	return []*table.SourceMetadata[*rows.AuditLog]{
 		{
 			SourceName: sources.AuditLogAPISourceIdentifier,
