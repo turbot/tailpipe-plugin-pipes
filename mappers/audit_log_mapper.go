@@ -17,7 +17,7 @@ func NewAuditLogMapper() table.Mapper[*rows.AuditLog] {
 	return &AuditLogMapper{}
 }
 
-func (m *AuditLogMapper) Map(_ context.Context, data any) ([]*rows.AuditLog, error) {
+func (m *AuditLogMapper) Map(_ context.Context, data any) (*rows.AuditLog, error) {
 	input, ok := data.(pipes.AuditRecord)
 	if !ok {
 		return nil, fmt.Errorf("expected pipes.AuditRecord, got %T", data)
@@ -46,7 +46,7 @@ func (m *AuditLogMapper) Map(_ context.Context, data any) ([]*rows.AuditLog, err
 	auditLog.TargetId = input.TargetId
 	auditLog.TenantId = input.TenantId
 
-	return []*rows.AuditLog{auditLog}, nil
+	return auditLog, nil
 }
 
 func (m *AuditLogMapper) Identifier() string {
