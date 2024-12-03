@@ -31,11 +31,11 @@ func (c *AuditLogTable) Identifier() string {
 	return AuditLogTableIdentifier
 }
 
-func (c *AuditLogTable) SupportedSources(_ *AuditLogTableConfig) []*table.SourceMetadata[*rows.AuditLog] {
+func (c *AuditLogTable) GetSourceMetadata(_ *AuditLogTableConfig) []*table.SourceMetadata[*rows.AuditLog] {
 	return []*table.SourceMetadata[*rows.AuditLog]{
 		{
 			SourceName: sources.AuditLogAPISourceIdentifier,
-			MapperFunc: mappers.NewAuditLogMapper,
+			Mapper:     &mappers.AuditLogMapper{},
 		},
 	}
 }

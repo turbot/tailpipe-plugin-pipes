@@ -7,14 +7,9 @@ import (
 
 	"github.com/turbot/pipes-sdk-go"
 	"github.com/turbot/tailpipe-plugin-pipes/rows"
-	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
 type AuditLogMapper struct {
-}
-
-func NewAuditLogMapper() table.Mapper[*rows.AuditLog] {
-	return &AuditLogMapper{}
 }
 
 func (m *AuditLogMapper) Map(_ context.Context, data any) (*rows.AuditLog, error) {
