@@ -1,7 +1,6 @@
 package tables
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/rs/xid"
@@ -40,17 +39,8 @@ func (c *AuditLogTable) GetSourceMetadata(_ *AuditLogTableConfig) []*table.Sourc
 	}
 }
 
-func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields *enrichment.CommonFields) (*rows.AuditLog, error) {
-	// we expect sourceEnrichmentFields to be set
-	if sourceEnrichmentFields == nil {
-		return nil, fmt.Errorf("AuditLogTable EnrichRow called with nil sourceEnrichmentFields")
-	}
-	// we expect name to be set by the Source
-	if sourceEnrichmentFields.TpSourceName == nil {
-		return nil, fmt.Errorf("AuditLogTable EnrichRow called with TpSourceName unset in sourceEnrichmentFields")
-	}
-
-	row.CommonFields = *sourceEnrichmentFields
+func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, _ *AuditLogTableConfig, sourceEnrichmentFields enrichment.SourceEnrichment) (*rows.AuditLog, error) {
+	row.CommonFields = sourceEnrichmentFields.CommonFields
 
 	// id & Hive fields
 	row.TpID = xid.New().String()
