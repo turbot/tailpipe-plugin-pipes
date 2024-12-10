@@ -69,10 +69,12 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 	// populate enrichment fields the source is aware of
 	// - in this case the connection
 	sourceName := AuditLogAPISourceIdentifier
-	sourceEnrichmentFields := &enrichment.CommonFields{
-		TpSourceName:     &sourceName,
-		TpSourceType:     AuditLogAPISourceIdentifier,
-		TpSourceLocation: &conn,
+	sourceEnrichmentFields := &enrichment.SourceEnrichment{
+		CommonFields: enrichment.CommonFields{
+			TpSourceName:     &sourceName,
+			TpSourceType:     AuditLogAPISourceIdentifier,
+			TpSourceLocation: &conn,
+		},
 	}
 
 	for {
@@ -109,7 +111,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 				}
 
 				// populate artifact data
-				row := &types.RowData{Data: item, Metadata: sourceEnrichmentFields}
+				row := &types.RowData{Data: item, SourceEnrichment: sourceEnrichmentFields}
 
 				// update collection state
 				collectionState.Upsert(createdAt, item.Id, nil)
