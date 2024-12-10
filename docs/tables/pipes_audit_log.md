@@ -1,17 +1,17 @@
-# Audit Log Table
+---
+title: "Tailpipe Table: pipes_audit_log - Query Tailpipe Audit Logs"
+description: "Allows users to query Tailpipe audit logs."
+---
 
-> [!NOTE]
-> To run these against the generated test data:
->
->  cd ../../testdata/generator
-> ```
->  duckdb
-> ```
-> ```
->  CREATE VIEW pipes_audit_log AS SELECT * FROM read_parquet('pipes_audit_log.parquet');
-> ```
+# Table: pipes_audit_log - Query Tailpipe audit logs
 
-## chatgpt
+*TODO*: Add description
+
+## Table Usage Guide
+
+The `pipes_audit_log` table allows you to query data from Tailpipe audit logs. This table provides detailed information about actions taken within your Turbot Pipes account, including the actor, action type, target, and more.
+
+## Examples
 
 ### Identify Suspicious Activity by Repeated Deletion Actions
 
