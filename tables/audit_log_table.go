@@ -17,7 +17,7 @@ func init() {
 	// 1. row struct
 	// 2. table config struct
 	// 3. table implementation
-	table.RegisterTable[*rows.AuditLog, *AuditLogTableConfig, *AuditLogTable]()
+	table.RegisterTable[*rows.AuditLog, *AuditLogTable]()
 }
 
 const AuditLogTableIdentifier = "pipes_audit_log"
@@ -29,7 +29,7 @@ func (c *AuditLogTable) Identifier() string {
 	return AuditLogTableIdentifier
 }
 
-func (c *AuditLogTable) GetSourceMetadata(_ *AuditLogTableConfig) []*table.SourceMetadata[*rows.AuditLog] {
+func (c *AuditLogTable) GetSourceMetadata() []*table.SourceMetadata[*rows.AuditLog] {
 	return []*table.SourceMetadata[*rows.AuditLog]{
 		{
 			SourceName: sources.AuditLogAPISourceIdentifier,
@@ -38,7 +38,7 @@ func (c *AuditLogTable) GetSourceMetadata(_ *AuditLogTableConfig) []*table.Sourc
 	}
 }
 
-func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, _ *AuditLogTableConfig, sourceEnrichmentFields schema.SourceEnrichment) (*rows.AuditLog, error) {
+func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields schema.SourceEnrichment) (*rows.AuditLog, error) {
 	row.CommonFields = sourceEnrichmentFields.CommonFields
 
 	// id & Hive fields
