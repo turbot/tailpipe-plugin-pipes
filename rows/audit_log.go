@@ -3,13 +3,13 @@ package rows
 import (
 	"time"
 
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"github.com/turbot/tailpipe-plugin-sdk/schema"
 )
 
 // AuditLog is the struct containing the enriched data for an AuditRecord
 type AuditLog struct {
 	// embed required enrichment fields
-	enrichment.CommonFields
+	schema.CommonFields
 
 	// Additional fields
 	ActionType       string                 `json:"action_type"`
