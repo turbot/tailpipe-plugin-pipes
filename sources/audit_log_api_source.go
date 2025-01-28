@@ -120,7 +120,7 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 					}
 				} else {
 					// we're done collecting
-					break
+					return nil
 				}
 			}
 		}
