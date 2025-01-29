@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/rs/xid"
+
 	"github.com/turbot/tailpipe-plugin-pipes/mappers"
 	"github.com/turbot/tailpipe-plugin-pipes/rows"
 	"github.com/turbot/tailpipe-plugin-pipes/sources"
@@ -63,4 +64,8 @@ func (c *AuditLogTable) EnrichRow(row *rows.AuditLog, sourceEnrichmentFields sch
 	row.TpUsernames = append(row.TpUsernames, row.ActorHandle, row.ActorId)
 
 	return row, nil
+}
+
+func (c *AuditLogTable) GetDescription() string {
+	return "Turbot Pipes audit logs detail administrative actions taken."
 }
