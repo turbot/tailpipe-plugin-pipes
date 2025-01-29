@@ -107,20 +107,18 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 					return fmt.Errorf("error parsing created_at field to time.Time: %w", err)
 				}
 
-				if s.CollectionState.ShouldCollect(item.Id, createdAt) {
-					row := &types.RowData{
-						Data:             item,
-						SourceEnrichment: sourceEnrichmentFields,
-					}
-					if err = s.CollectionState.OnCollected(item.Id, createdAt); err != nil {
-						return fmt.Errorf("error updating collection state: %w", err)
-					}
-					if err = s.OnRow(ctx, row); err != nil {
-						return fmt.Errorf("error processing row: %w", err)
-					}
-				} else {
-					// we're done collecting
+				// check if we should collect this item, if not exit
+				if createdAt.Before(s.FromTime) || !s.CollectionState.ShouldCollect(item.Id, createdAt) {
 					return nil
+				}
+
+				// build a row from item and collect it
+				row := &types.RowData{Data: item, SourceEnrichment: sourceEnrichmentFields}
+				if err = s.CollectionState.OnCollected(item.Id, createdAt); err != nil {
+					return fmt.Errorf("error updating collection state: %w", err)
+				}
+				if err = s.OnRow(ctx, row); err != nil {
+					return fmt.Errorf("error processing row: %w", err)
 				}
 			}
 		}
