@@ -24,14 +24,23 @@ func init() {
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
 	row_source.RowSourceImpl[*AuditLogAPISourceConfig, *config.PipesConnection]
+
+	// shadow the collection state to use the reverse order collection state
+	CollectionState *collection_state.ReverseOrderCollectionState[*AuditLogAPISourceConfig]
 }
 
-func (s *AuditLogAPISource) Init(ctx context.Context, configData types.ConfigData, connectionData types.ConfigData, opts ...row_source.RowSourceOption) error {
+func (s *AuditLogAPISource) Init(ctx context.Context, params *row_source.RowSourceParams, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
-	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
+	s.NewCollectionStateFunc = collection_state.NewReverseOrderCollectionState
 
 	// call base init
-	return s.RowSourceImpl.Init(ctx, configData, connectionData, opts...)
+	if err := s.RowSourceImpl.Init(ctx, params, opts...); err != nil {
+		return err
+	}
+
+	// type assertion to store correctly typed collection state
+	s.CollectionState = s.RowSourceImpl.CollectionState.(*collection_state.ReverseOrderCollectionState[*AuditLogAPISourceConfig])
+	return nil
 }
 
 func (s *AuditLogAPISource) Identifier() string {
@@ -39,13 +48,8 @@ func (s *AuditLogAPISource) Identifier() string {
 }
 
 func (s *AuditLogAPISource) Collect(ctx context.Context) error {
-	// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtained item.
-	collectionState := s.CollectionState.(*collection_state.TimeRangeCollectionState[*AuditLogAPISourceConfig])
-	// TODO: #config the below should be settable via a config option
-	collectionState.IsChronological = false
-	collectionState.HasContinuation = false
-	// TODO: #collectionState is there a way we can call StartCollection/EndCollection from elsewhere to enforce it?
-	collectionState.StartCollection()
+	s.CollectionState.Start()
+	defer s.CollectionState.End()
 
 	var nextToken string
 
@@ -97,29 +101,23 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 
 			for _, item := range items {
 				// get time as time opposed to string
-				createdAt, err := time.Parse(time.RFC3339, item.CreatedAt)
+				var createdAt time.Time
+				createdAt, err = time.Parse(time.RFC3339, item.CreatedAt)
 				if err != nil {
 					return fmt.Errorf("error parsing created_at field to time.Time: %w", err)
 				}
 
-				// check if we've hit previous item - end collection and return if we have
-				// TODO: #collectionState this will fill until we hit record in previous state, but what if we have gaps? [incoming data] -> [data]ENDS-HERE -> [gap] -> [data]
-				if !collectionState.ShouldCollectRow(createdAt, item.Id) {
-					collectionState.EndCollection()
+				// check if we should collect this item, if not exit
+				if createdAt.Before(s.FromTime) || !s.CollectionState.ShouldCollect(item.Id, createdAt) {
 					return nil
 				}
 
-				// populate artifact data
+				// build a row from item and collect it
 				row := &types.RowData{Data: item, SourceEnrichment: sourceEnrichmentFields}
-
-				// update collection state
-				collectionState.Upsert(createdAt, item.Id, nil)
-				collectionStateJSON, err := s.GetCollectionStateJSON()
-				if err != nil {
-					return fmt.Errorf("error serialising collectionState data: %w", err)
+				if err = s.CollectionState.OnCollected(item.Id, createdAt); err != nil {
+					return fmt.Errorf("error updating collection state: %w", err)
 				}
-
-				if err := s.OnRow(ctx, row, collectionStateJSON); err != nil {
+				if err = s.OnRow(ctx, row); err != nil {
 					return fmt.Errorf("error processing row: %w", err)
 				}
 			}
@@ -132,6 +130,5 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 		}
 	}
 
-	collectionState.EndCollection()
 	return nil
 }
