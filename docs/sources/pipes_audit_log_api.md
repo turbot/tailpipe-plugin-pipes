@@ -1,14 +1,37 @@
 ---
-title: "Source: pipes_audit_log_api - Query Tailpipe Audit Logs"
-description: "Allows users to collect Tailpipe audit logs."
+title: "Source: pipes_audit_log_api - Collect logs from Pipes audit log API"
+description: "Allows users to collect logs from the Turbot Pipes audit og API."
 ---
 
-# Source: pipes_audit_log_api - Query Tailpipe Audit Logs
+# Source: pipes_audit_log_api - Collect logs from Pipes audit log API
 
-The `pipes_audit_log_api` source allows you to collect Tailpipe audit logs. This source provides detailed information about actions taken within your Turbot Pipes account, including the actor, action type, target, and more.
+The Pipes Audit log API provides access to audit logs for activities within Turbot Pipes. These logs help track administrative actions, security events, and system changes. The API enables users to query, monitor, and analyze audit logs for governance, compliance, and security investigations.
 
-## Configuration
+Using this source, you can collect, filter, and analyze logs retrieved from the Pipes audit log API to enhance visibility into operations and security monitoring within Turbot Pipes.
 
-| Property | Description | Default |
-| - | - | - |
-| `connection` | The connection to use to connect to the Turbot Pipes account. | - |
+## Example Configurations
+
+### Collect audit logs
+
+Collect audit logs for a Turbot Pipes organization.
+
+```hcl
+connection "pipes" "pipes_organization" {
+  token      = "tpt_pipestoken"
+  org_handle = "org_handle_name"
+}
+
+partition "pipes_audit_log" "my_logs" {
+  source "pipes_audit_log" {
+    connection = connection.pipes.pipes_organization
+  }
+}
+```
+
+## Arguments
+
+| Argument   | Required | Default                  | Description                                                                                                                 |
+|------------|----------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| connection | No       | `connection.pipes.default` | The [Pipes connection](https://hub.tailpipe.io/plugins/turbot/pipes#connection-credentials) to use to connect to the Turbot Pipes workspace. |
+
+ 
