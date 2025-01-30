@@ -44,8 +44,6 @@ tailpipe collect pipes_audit_log.my_logs
 
 ## Query
 
-**[Explore 40+ example queries for this table →](https://hub.tailpipe.io/plugins/turbot/pipes/queries/pipes_audit_log)**
-
 ### Token creations
 
 List role assignments to check for unexpected or suspicious role changes.
