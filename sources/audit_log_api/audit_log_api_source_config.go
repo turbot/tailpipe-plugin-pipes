@@ -1,4 +1,4 @@
-package sources
+package audit_log_api
 
 import (
 	"github.com/hashicorp/hcl/v2"

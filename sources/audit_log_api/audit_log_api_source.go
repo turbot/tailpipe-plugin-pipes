@@ -1,4 +1,4 @@
-package sources
+package audit_log_api
 
 import (
 	"context"
@@ -15,11 +15,6 @@ import (
 )
 
 const AuditLogAPISourceIdentifier = "pipes_audit_log_api"
-
-// init function should register the source
-func init() {
-	row_source.RegisterRowSource[*AuditLogAPISource]()
-}
 
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
