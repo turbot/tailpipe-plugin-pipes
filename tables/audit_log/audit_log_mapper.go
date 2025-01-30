@@ -1,25 +1,25 @@
-package mappers
+package audit_log
 
 import (
 	"context"
 	"fmt"
-	"github.com/turbot/tailpipe-plugin-sdk/table"
 	"time"
 
+	"github.com/turbot/tailpipe-plugin-sdk/table"
+
 	"github.com/turbot/pipes-sdk-go"
-	"github.com/turbot/tailpipe-plugin-pipes/rows"
 )
 
 type AuditLogMapper struct {
 }
 
-func (m *AuditLogMapper) Map(_ context.Context, data any, _ ...table.MapOption[*rows.AuditLog]) (*rows.AuditLog, error) {
+func (m *AuditLogMapper) Map(_ context.Context, data any, _ ...table.MapOption[*AuditLog]) (*AuditLog, error) {
 	input, ok := data.(pipes.AuditRecord)
 	if !ok {
 		return nil, fmt.Errorf("expected pipes.AuditRecord, got %T", data)
 	}
 
-	auditLog := &rows.AuditLog{}
+	auditLog := &AuditLog{}
 
 	createdAt, err := time.Parse(time.RFC3339, input.CreatedAt)
 	if err != nil {

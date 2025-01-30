@@ -1,4 +1,4 @@
-package rows
+package audit_log
 
 import (
 	"time"
