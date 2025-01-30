@@ -1,3 +1,9 @@
+## v0.1.1 [2025-01-30]
+
+_Bug fixes_
+
+- Fixed table and source doc filenames to fix Hub build.
+
 ## v0.1.0 [2025-01-30]
 
 _What's new?_
