@@ -1,4 +1,16 @@
-# Turbot Pipes Plugin for Tailpipe
+---
+organization: Turbot
+category: ["saas"]
+icon_url: "/images/plugins/turbot/pipes.svg"
+brand_color: "#FABF1B"
+display_name: "Turbot Pipes"
+short_name: "pipes"
+description: "Tailpipe plugin for collecting and querying logs from Turbot Pipes."
+og_description: "Query Turbot Pipes logs with SQL! Open source CLI. No DB required."
+og_image: "/images/plugins/turbot/pipes-social-graphic.png"
+---
+
+# Turbot Pipes + Tailpipe
 
 [Tailpipe](https://tailpipe.io) is an open-source CLI tool that allows you to collect logs and query them with SQL.
 
@@ -6,13 +18,11 @@
 
 The [Turbot Pipes Plugin for Tailpipe](https://hub.tailpipe.io/plugins/turbot/pipes) allows you to collect and query Pipes logs using SQL to track activity, monitor trends, detect anomalies, and more!
 
-- **[Get started →](https://hub.tailpipe.io/plugins/turbot/pipes)**
 - Documentation: [Table definitions & examples](https://hub.tailpipe.io/plugins/turbot/pipes/tables)
 - Community: [Join #tailpipe on Slack →](https://turbot.com/community/join)
 - Get involved: [Issues](https://github.com/turbot/tailpipe-plugin-pipes/issues)
 
-Collect and query logs:
-![image](docs/images/pipes_audit_log_terminal.png)
+<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-pipes/main/docs/images/pipes_audit_log_terminal.png" width="50%" type="thumbnail"/>
 
 ## Getting Started
 
@@ -102,50 +112,29 @@ order by
 +---------------------------------------+-----------------------+-------------+
 ```
 
-## Developing
+## Connection Credentials
 
-Prerequisites:
+### Arguments
 
-- [Tailpipe](https://tailpipe.io/downloads)
-- [Golang](https://golang.org/doc/install)
+| Name                   | Type          | Required | Description                                                                               |
+|------------------------|---------------|----------|-------------------------------------------------------------------------------------------|
+| `token`                | String        | Yes      | Authentication token for accessing the Turbot Pipes API.                                  |
+| `org_handle`           | String        | Yes      | Unique identifier for the Turbot Pipes organization, used to scope API requests.          |
 
-Clone:
 
-```sh
-git clone https://github.com/turbot/tailpipe-plugin-pipes.git
-cd tailpipe-plugin-pipes
+### Turbot Pipes Credentials
+
+You need to specify the Pipes token along with the organization handle to authenticate to the pipes environment. A connection per organization, using tokens and organization handle is probably the most common configuration:
+
+- `token`: A unique authentication [API token]((https://turbot.com/pipes/docs/da-settings#tokens)) used to securely connect to the Turbot Pipes API. This token grants access to query resources within the specified organization.
+- `org_handle`: The unique identifier (handle) for your Turbot Pipes organization. This is required to scope API requests to the correct organization and ensure access to relevant resources.
+
+#### pipes.tpc:
+
+```hcl
+connection "pipes" "pipes_org" {
+  token      = "pipes_token"
+  org_handle = "pipes_org_handle"
+}
 ```
 
-After making your local changes, build the plugin, which automatically installs the new version to your `~/.tailpipe/plugins` directory:
-
-```sh
-make
-```
-
-Re-collect your data:
-
-```sh
-tailpipe collect pipes_audit_log
-```
-
-Try it!
-
-```sh
-tailpipe query
-> .inspect pipes_audit_log
-```
-
-## Open Source & Contributing
-
-This repository is published under the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) (source code) and [CC BY-NC-ND](https://creativecommons.org/licenses/by-nc-nd/2.0/) (docs) licenses. Please see our [code of conduct](https://github.com/turbot/.github/blob/main/CODE_OF_CONDUCT.md). We look forward to collaborating with you!
-
-[Tailpipe](https://tailpipe.io) is a product produced from this open source software, exclusively by [Turbot HQ, Inc](https://turbot.com). It is distributed under our commercial terms. Others are allowed to make their own distribution of the software, but cannot use any of the Turbot trademarks, cloud services, etc. You can learn more in our [Open Source FAQ](https://turbot.com/open-source).
-
-## Get Involved
-
-**[Join #tailpipe on Slack →](https://turbot.com/community/join)**
-
-Want to help but don't know where to start? Pick up one of the `help wanted` issues:
-
-- [Tailpipe](https://github.com/turbot/tailpipe/labels/help%20wanted)
-- [Pipes Plugin](https://github.com/turbot/tailpipe-plugin-pipes/labels/help%20wanted)

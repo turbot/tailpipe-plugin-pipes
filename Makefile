@@ -1,36 +1,33 @@
-# Paths
-PLUGIN_NAME=tailpipe-plugin-pipes.so
-PLUGIN_DIR=~/.tailpipe/plugins
+TAILPIPE_INSTALL_DIR ?= ~/.tailpipe
+BUILD_TAGS = netgo
+install:
+	go build -o $(TAILPIPE_INSTALL_DIR)/plugins/hub.tailpipe.io/plugins/turbot/pipes@latest/tailpipe-plugin-pipes.plugin -tags "${BUILD_TAGS}" *.go
 
-# Build flags
-PROD_FLAGS=-buildmode=plugin
-DEV_FLAGS=-buildmode=plugin -gcflags='all=-N -l'
+## Paths
+#PLUGIN_NAME=tailpipe-plugin-pipes.plugin
+#PLUGIN_DIR=~/.tailpipe/plugins/hub.tailpipe.io/plugins/turbot/pipes@latest/
+#
+## Build in development mode by default
+#.PHONY: default
+#default: install
+#
+## Production build, optimized
+#.PHONY: build
+#build:
+#	go build -o $(PLUGIN_NAME) .
+#
+## Install the development build
+#.PHONY: install
+#install: build
+#	mv $(PLUGIN_NAME) $(PLUGIN_DIR)
+#
+## Run tests
+#.PHONY: test
+#test:
+#	go test ./... -v
+#
+## Clean up generated files
+#.PHONY: clean
+#clean:
+#	rm -f $(PLUGIN_NAME)
 
-# Build in development mode by default
-.PHONY: default
-default: dev-install
-
-# Production build, optimized
-.PHONY: build
-build:
-	go build $(PROD_FLAGS) -o $(PLUGIN_NAME) .
-
-# Development build, removes optimizations to allow debugging
-.PHONY: dev
-dev:
-	go build $(DEV_FLAGS) -o $(PLUGIN_NAME) .
-
-# Install the development build
-.PHONY: dev-install
-dev-install: dev
-	cp $(PLUGIN_NAME) $(PLUGIN_DIR)
-
-# Run tests
-.PHONY: test
-test:
-	go test ./... -v
-
-# Clean up generated files
-.PHONY: clean
-clean:
-	rm -f $(PLUGIN_NAME)
