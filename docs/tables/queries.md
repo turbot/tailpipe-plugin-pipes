@@ -53,9 +53,9 @@ order by
 
 ## Detection Examples
 
-### High privilege role assignments
+### Unusual Workspace Deletions
 
-Detect when high-privilege roles were assigned.
+Detect when multiple workspaces are deleted in a short period.
 
 ```sql
 select
@@ -66,25 +66,83 @@ select
 from
   pipes_audit_log
 where
-  action_type = 'role_assignment'
+  action_type = 'workspace.delete'
+group by
+  created_at, actor_handle, target_handle, action_type
+having
+  count(*) > 2
 order by
   created_at desc;
 ```
 
-### Unusual login attempts
+### High Privilege Role Changes
 
-Identify failed login attempts and unusual authentication failures.
+Identify when members of an organization or tenant are updated or removed.
 
 ```sql
 select
   created_at,
   actor_handle,
-  action_type,
-  actor_ip
+  target_handle,
+  action_type
 from
   pipes_audit_log
 where
-  action_type in ('login_failed', 'unauthorized_access')
+  action_type in ('org.member.update', 'org.member.delete', 'tenant.member.update', 'tenant.member.delete')
+order by
+  created_at desc;
+```
+
+### Unauthorized Token Activity
+
+Detect unusual token creation, updates, or deletions.
+
+```sql
+select
+  created_at,
+  actor_handle,
+  target_handle,
+  action_type
+from
+  pipes_audit_log
+where
+  action_type in ('token.create', 'token.update', 'token.delete')
+order by
+  created_at desc;
+```
+
+### Organization Subscription Cancellations
+
+Monitor if organization or user subscriptions are being canceled.
+
+```sql
+select
+  created_at,
+  actor_handle,
+  target_handle,
+  action_type
+from
+  pipes_audit_log
+where
+  action_type in ('org.subscription.canceled', 'user.subscription.canceled')
+order by
+  created_at desc;
+```
+
+### Workspace Schema Changes
+
+Track modifications in workspace schemas.
+
+```sql
+select
+  created_at,
+  actor_handle,
+  target_handle,
+  action_type
+from
+  pipes_audit_log
+where
+  action_type in ('workspace.schema.create', 'workspace.schema.update', 'workspace.schema.delete', 'workspace.schema.attach', 'workspace.schema.detach')
 order by
   created_at desc;
 ```
