@@ -41,14 +41,14 @@ vi ~/.tailpipe/config/pipes.tpc
 ```
 
 ```hcl
-connection "pipes" "logging_account" {
-  token = "tpt_pipestoken"
+connection "pipes" "pipes_organization" {
+  token      = "tpt_pipestoken"
+  org_handle = "org_handle_name"
 }
 
 partition "pipes_audit_log" "my_logs" {
   source "pipes_audit_log" {
-    connection = connection.pipes.logging_account
-    org_handle = "org_handle_name"
+    connection = connection.pipes.pipes_organization
   }
 }
 ```
