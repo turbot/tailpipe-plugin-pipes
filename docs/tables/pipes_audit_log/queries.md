@@ -16,7 +16,7 @@ order by
   event_date asc;
 ```
 
-```
+```yaml
 folder: Organization
 ```
 
@@ -37,7 +37,7 @@ order by
 limit 10;
 ```
 
-```
+```yaml
 folder: Organization
 ```
 
@@ -59,7 +59,7 @@ order by
   event_count desc;
 ```
 
-```
+```yaml
 folder: Organization
 ```
 
@@ -87,7 +87,7 @@ order by
   created_at desc;
 ```
 
-```
+```yaml
 folder: Workspace
 ```
 
@@ -109,7 +109,7 @@ order by
   created_at desc;
 ```
 
-```
+```yaml
 folder: Member
 ```
 
@@ -131,7 +131,7 @@ order by
   created_at desc;
 ```
 
-```
+```yaml
 folder: Token
 ```
 
@@ -153,7 +153,7 @@ order by
   created_at desc;
 ```
 
-```
+```yaml
 folder: Subscription
 ```
 
@@ -175,7 +175,7 @@ order by
   created_at desc;
 ```
 
-```
+```yaml
 folder: Schema
 ```
 
@@ -199,7 +199,7 @@ order by
   event_count desc;
 ```
 
-```
+```yaml
 folder: Organization
 ```
 
@@ -221,6 +221,6 @@ order by
   created_at desc;
 ```
 
-```
+```yaml
 folder: Organization
 ```
