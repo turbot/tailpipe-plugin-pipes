@@ -1,3 +1,10 @@
+## v0.2.0 [2025-03-03]
+
+_Enhancements_
+
+- Standardized all example query titles to use `Title Case` for consistency. ([#17](https://github.com/turbot/tailpipe-plugin-pipes/pull/17))
+- Added `folder` front matter to all queries for improved organization and discoverability in the Hub. ([#17](https://github.com/turbot/tailpipe-plugin-pipes/pull/17))
+
 ## v0.1.1 [2025-01-30]
 
 _Bug fixes_
