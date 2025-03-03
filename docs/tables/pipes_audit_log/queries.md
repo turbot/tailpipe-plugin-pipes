@@ -1,6 +1,6 @@
 ## Activity Examples
 
-### Daily activity trends
+### Daily Activity Trends
 
 Count events per day to identify activity trends over time.
 
@@ -16,7 +16,11 @@ order by
   event_date asc;
 ```
 
-### Top 10 events
+```yaml
+folder: Organization
+```
+
+### Top 10 Events
 
 List the 10 most frequently recorded events.
 
@@ -33,7 +37,11 @@ order by
 limit 10;
 ```
 
-### Top events by actor
+```yaml
+folder: Organization
+```
+
+### Top Events by Actor
 
 Identify the most frequently performed actions by an actor.
 
@@ -49,6 +57,10 @@ group by
   action_type
 order by
   event_count desc;
+```
+
+```yaml
+folder: Organization
 ```
 
 ## Detection Examples
@@ -75,6 +87,10 @@ order by
   created_at desc;
 ```
 
+```yaml
+folder: Workspace
+```
+
 ### High Privilege Role Changes
 
 Identify when members of an organization or tenant are updated or removed.
@@ -91,6 +107,10 @@ where
   action_type in ('org.member.update', 'org.member.delete', 'tenant.member.update', 'tenant.member.delete')
 order by
   created_at desc;
+```
+
+```yaml
+folder: Member
 ```
 
 ### Unauthorized Token Activity
@@ -111,6 +131,10 @@ order by
   created_at desc;
 ```
 
+```yaml
+folder: Token
+```
+
 ### Organization Subscription Cancellations
 
 Monitor if organization or user subscriptions are being canceled.
@@ -127,6 +151,10 @@ where
   action_type in ('org.subscription.canceled', 'user.subscription.canceled')
 order by
   created_at desc;
+```
+
+```yaml
+folder: Subscription
 ```
 
 ### Workspace Schema Changes
@@ -147,7 +175,11 @@ order by
   created_at desc;
 ```
 
-### High volume API calls by user
+```yaml
+folder: Schema
+```
+
+### High Volume API Calls by User
 
 Find users generating a high volume of API calls to detect potential abuse.
 
@@ -167,7 +199,11 @@ order by
   event_count desc;
 ```
 
-### Activity from unapproved IP addresses
+```yaml
+folder: Organization
+```
+
+### Activity from Unapproved IP Addresses
 
 Detect actions performed from outside approved network locations.
 
@@ -185,3 +221,6 @@ order by
   created_at desc;
 ```
 
+```yaml
+folder: Organization
+```
