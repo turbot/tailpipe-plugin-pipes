@@ -2,28 +2,31 @@ package audit_log
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 	"time"
 
-	"github.com/turbot/tailpipe-plugin-sdk/table"
-
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/tailpipe-plugin-sdk/error_types"
+	"github.com/turbot/tailpipe-plugin-sdk/mappers"
 )
 
 type AuditLogMapper struct {
 }
 
-func (m *AuditLogMapper) Map(_ context.Context, data any, _ ...table.MapOption[*AuditLog]) (*AuditLog, error) {
+func (m *AuditLogMapper) Map(_ context.Context, data any, _ ...mappers.MapOption[*AuditLog]) (*AuditLog, error) {
 	input, ok := data.(pipes.AuditRecord)
 	if !ok {
-		return nil, fmt.Errorf("expected pipes.AuditRecord, got %T", data)
+		slog.Error("unable to map audit log record: expected pipes.AuditRecord, got %T", data)
+		return nil, error_types.NewRowErrorWithMessage("unable to map row, invalid type received")
 	}
 
 	auditLog := &AuditLog{}
 
 	createdAt, err := time.Parse(time.RFC3339, input.CreatedAt)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing created_at field to time.Time: %w", err)
+		slog.Error("audit log %s failed mapping created_at field to time.Time: %v", input.Id, err)
+		return nil, error_types.NewRowErrorWithFields([]string{}, []string{"created_at"})
 	}
 
 	auditLog.ActionType = input.ActionType
@@ -35,8 +38,8 @@ func (m *AuditLogMapper) Map(_ context.Context, data any, _ ...table.MapOption[*
 	auditLog.CreatedAt = createdAt
 	auditLog.Data = input.Data
 	auditLog.Id = input.Id
-	auditLog.IdentityHandle = input.IdentityHandle
-	auditLog.IdentityId = input.IdentityId
+	auditLog.IdentityHandle = types.SafeString(input.IdentityHandle)
+	auditLog.IdentityId = types.SafeString(input.IdentityId)
 	auditLog.ProcessId = input.ProcessId
 	auditLog.TargetHandle = input.TargetHandle
 	auditLog.TargetId = input.TargetId

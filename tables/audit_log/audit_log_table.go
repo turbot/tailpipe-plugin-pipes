@@ -19,13 +19,13 @@ func (c *AuditLogTable) Identifier() string {
 	return AuditLogTableIdentifier
 }
 
-func (c *AuditLogTable) GetSourceMetadata() []*table.SourceMetadata[*AuditLog] {
+func (c *AuditLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*AuditLog], error) {
 	return []*table.SourceMetadata[*AuditLog]{
 		{
 			SourceName: audit_log_api.AuditLogAPISourceIdentifier,
 			Mapper:     &AuditLogMapper{},
 		},
-	}
+	}, nil
 }
 
 func (c *AuditLogTable) EnrichRow(row *AuditLog, sourceEnrichmentFields schema.SourceEnrichment) (*AuditLog, error) {
