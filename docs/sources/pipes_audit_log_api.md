@@ -22,7 +22,7 @@ connection "pipes" "pipes_organization" {
 }
 
 partition "pipes_audit_log" "my_logs" {
-  source "pipes_audit_log" {
+  source "pipes_audit_log_api" {
     connection = connection.pipes.pipes_organization
   }
 }
