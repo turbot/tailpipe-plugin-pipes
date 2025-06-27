@@ -4,17 +4,12 @@ go 1.24
 
 toolchain go1.24.1
 
-replace (
-	github.com/turbot/pipe-fittings/v2 => ../pipe-fittings
-	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
-)
-
 require (
 	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/rs/xid v1.6.0
 	github.com/turbot/go-kit v1.3.0
 	github.com/turbot/pipes-sdk-go v0.12.0
-	github.com/turbot/tailpipe-plugin-sdk v0.7.1
+	github.com/turbot/tailpipe-plugin-sdk v0.9.0-rc.1
 )
 
 require (
