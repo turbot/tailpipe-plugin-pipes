@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.1
 
 require (
-	github.com/hashicorp/hcl/v2 v2.20.1
+	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/rs/xid v1.6.0
 	github.com/turbot/go-kit v1.3.0
 	github.com/turbot/pipes-sdk-go v0.12.0
