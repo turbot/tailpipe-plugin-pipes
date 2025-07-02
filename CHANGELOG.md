@@ -1,3 +1,9 @@
+## v0.4.1 [2025-07-02]
+
+_Dependencies_
+
+- Recompiled plugin with [tailpipe-plugin-sdk v0.9.1](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v091-2025-07-02) that fixes collection state issues. ([#34](https://github.com/turbot/tailpipe-plugin-pipes/pull/34))
+
 ## v0.4.0 [2025-07-02]
 
 _Dependencies_
