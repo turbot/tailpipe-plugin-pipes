@@ -33,7 +33,6 @@ func (c *AuditLogTable) EnrichRow(row *AuditLog, sourceEnrichmentFields schema.S
 
 	// id & Hive fields
 	row.TpID = xid.New().String()
-	row.TpIndex = row.IdentityHandle
 	row.TpDate = row.CreatedAt.Truncate(24 * time.Hour)
 
 	// Timestamps

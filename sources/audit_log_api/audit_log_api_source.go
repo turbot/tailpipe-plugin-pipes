@@ -19,22 +19,20 @@ const AuditLogAPISourceIdentifier = "pipes_audit_log_api"
 // AuditLogAPISource source is responsible for collecting audit logs from Turbot Pipes API
 type AuditLogAPISource struct {
 	row_source.RowSourceImpl[*AuditLogAPISourceConfig, *config.PipesConnection]
-
-	// shadow the collection state to use the reverse order collection state
-	CollectionState *collection_state.ReverseOrderCollectionState[*AuditLogAPISourceConfig]
 }
 
 func (s *AuditLogAPISource) Init(ctx context.Context, params *row_source.RowSourceParams, opts ...row_source.RowSourceOption) error {
+	// set collection order to reverse
+	s.CollectionOrder = collection_state.CollectionOrderReverse
+
 	// set the collection state ctor
-	s.NewCollectionStateFunc = collection_state.NewReverseOrderCollectionState
+	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
 	// call base init
 	if err := s.RowSourceImpl.Init(ctx, params, opts...); err != nil {
 		return err
 	}
 
-	// type assertion to store correctly typed collection state
-	s.CollectionState = s.RowSourceImpl.CollectionState.(*collection_state.ReverseOrderCollectionState[*AuditLogAPISourceConfig])
 	return nil
 }
 
@@ -43,9 +41,6 @@ func (s *AuditLogAPISource) Identifier() string {
 }
 
 func (s *AuditLogAPISource) Collect(ctx context.Context) error {
-	s.CollectionState.Start()
-	defer s.CollectionState.End()
-
 	var nextToken string
 
 	// Create a default configuration
@@ -102,8 +97,15 @@ func (s *AuditLogAPISource) Collect(ctx context.Context) error {
 					return fmt.Errorf("error parsing created_at field to time.Time: %w", err)
 				}
 
-				// check if we should collect this item, if not exit
-				if createdAt.Before(s.FromTime) || !s.CollectionState.ShouldCollect(item.Id, createdAt) {
+				// check if we should collect this item
+				if !s.CollectionState.ShouldCollect(item.Id, createdAt) {
+					continue
+				}
+
+				// if the createdAt time is on or after the end time of the collection, stop processing
+				// NOTE: that as we are actually collecting backwards OnOrAfterEnd checks if
+				// the createdAt time is on or BEFORE the LOWER boundary
+				if s.CollectionTimeRange.OnOrAfterEnd(createdAt) {
 					return nil
 				}
 
