@@ -1,3 +1,9 @@
+## v0.4.0 [2025-07-02]
+
+_Dependencies_
+
+- Recompiled plugin with [tailpipe-plugin-sdk v0.9.0](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v090-2025-07-02) to support the `--to` flag and update tracking of collected data to support multiple separate time ranges. ([#30](https://github.com/turbot/tailpipe-plugin-pipes/pull/30))
+
 ## v0.3.1 [2025-06-04]
 
 - Recompiled plugin with [tailpipe-plugin-sdk v0.7.1](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v071-2025-06-04) that fixes an issue affecting collections using a file source. ([#26](https://github.com/turbot/tailpipe-plugin-pipes/pull/26))
