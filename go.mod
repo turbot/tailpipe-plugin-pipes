@@ -163,7 +163,7 @@ require (
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
 	github.com/turbot/pipe-fittings/v2 v2.6.0 // indirect
 	github.com/turbot/terraform-components v0.0.0-20231213122222-1f3526cab7a7 // indirect
-	github.com/ulikunitz/xz v0.5.10 // indirect
+	github.com/ulikunitz/xz v0.5.14 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
