@@ -9,7 +9,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/turbot/go-kit v1.3.0
 	github.com/turbot/pipes-sdk-go v0.12.0
-	github.com/turbot/tailpipe-plugin-sdk v0.9.2
+	github.com/turbot/tailpipe-plugin-sdk v0.9.4
 )
 
 require (
