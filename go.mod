@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/rs/xid v1.6.0
-	github.com/turbot/go-kit v1.3.0
+	github.com/turbot/go-kit v1.3.1
 	github.com/turbot/pipes-sdk-go v0.12.0
 	github.com/turbot/tailpipe-plugin-sdk v0.9.2
 )
@@ -63,7 +63,7 @@ require (
 	github.com/elastic/go-grok v0.3.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fsnotify/fsnotify v1.8.0 // indirect
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gertd/go-pluralize v0.2.1 // indirect
 	github.com/go-git/go-git/v5 v5.13.0 // indirect
